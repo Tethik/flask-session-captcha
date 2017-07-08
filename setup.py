@@ -21,7 +21,8 @@ setup(
         install_requires=[
             'captcha',
             'flask-session',
-            'flask'
+            'flask',
+            'flask-SQLAlchemy',
         ],
         tests_require=[
             'pytest',
