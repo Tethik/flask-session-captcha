@@ -37,7 +37,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         # without right cookie
         r = self.client.get("/")
         self.client.set_cookie("localhost", "session", "wrong")
-        r = self.client.post("/", data={"s": "something", "captcha": str(r.data, 'utf-8')})
+        r = self.client.post("/", data={"s": "something", "captcha": r.data.decode('utf-8')})
         assert r.data == b"nope" # no session
 
     def test_captcha_ok(self):    
@@ -45,7 +45,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         _default_routes(captcha, self.app)
         # everything ok
         r = self.client.get("/")
-        r = self.client.post("/", data={"s": "something", "captcha": str(r.data, 'utf-8')})
+        r = self.client.post("/", data={"s": "something", "captcha": r.data.decode('utf-8')})
         assert r.data == b"ok"
 
     def test_captcha_replay(self):
@@ -53,7 +53,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         _default_routes(captcha, self.app)
 
         r = self.client.get("/")
-        captcha_value = str(r.data, 'utf-8')
+        captcha_value = r.data.decode('utf-8')
         
         cookies = self.client.cookie_jar._cookies['localhost.local']['/']['session']        
         r = self.client.post("/", data={"s": "something", "captcha": captcha_value})
@@ -70,7 +70,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         r = self.client.post("/", data={"s": "something"})
         assert r.data == b"ok"
         r = self.client.get("/")
-        captcha_value = str(r.data, 'utf-8')        
+        captcha_value = r.data.decode('utf-8')       
         r = self.client.post("/", data={"s": "something", "captcha": captcha_value})
         assert r.data == b"ok"    
         r = self.client.post("/", data={"s": "something", "captcha": "false"})
@@ -83,7 +83,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
 
         # everything ok    
         r = self.client.get("http://localhost:5000/")
-        captcha_value = str(r.data, 'utf-8') 
+        captcha_value = r.data.decode('utf-8')
         assert len(captcha_value) == 8
 
     def test_captcha_jinja_global(self):
