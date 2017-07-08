@@ -19,10 +19,11 @@ def some_route():
 
 ```
 
+In the template:
+
 ```html
-<form method="post">
-    <img src="{{captcha_img}}">
-    <input type="text" name="captcha">
-    <input type="submit" name="submit">
+<form method="POST">
+    {{ captcha() }}
+    <input type="submit">
 </form>
 ```

@@ -1,60 +1,131 @@
-import multiprocessing
-import logging
-import sys
-
-import pytest
-import requests
-from flask import Flask, session, request
+import unittest
 from flask_session_captcha import FlaskSessionCaptcha
+from flask import Flask, request
 from flask_session import Session
-from parsel import Selector
+from werkzeug.test import Headers
 
-@pytest.fixture()
-def run_app():
-    class zzz:
-        p = None
+class FlaskSessionCaptchaTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.app.config['SECRET_KEY'] = 'aba'
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
+        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        self.app.config['SESSION_TYPE'] = 'sqlalchemy'
+        self.app.config['CAPTCHA_ENABLE'] = True
+        self.app.config['CAPTCHA_NUMERIC_DIGITS'] = 5
+        self.app.testing = True
+        Session(self.app)
 
-    def function(app, port):
-        @app.route('/kill')
-        def kill():
-            request.environ.get('werkzeug.server.shutdown')()
-            return ""
+        self.client = self.app.test_client()
+    
+    def test_captcha_wrong(self):    
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)               
 
-        @app.route('/status')
-        def status():
-            return "1"
+        # try some wrong values
+        r = self.client.post("/", data={"s": "something"})
+        assert r.data == b"nope"
+        r = self.client.post("/", data={"s": "something", "captcha": ""})
+        assert r.data == b"nope"
+        r = self.client.post("/", data={"s": "something", "captcha": "also wrong"})
+        assert r.data == b"nope"
 
-        def run_server():
-            print("starting app..")
-            app.run(host="127.0.0.1", port=port)
+    def test_captcha_without_cookie(self):    
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)
 
-        zzz.p = multiprocessing.Process(target=run_server)
-        zzz.p.start()
+        # without right cookie
+        r = self.client.get("/")
+        self.client.set_cookie("localhost", "session", "wrong")
+        r = self.client.post("/", data={"s": "something", "captcha": str(r.data, 'utf-8')})
+        assert r.data == b"nope" # no session
 
-        #try until we can connect
-        while True:
-            url = 'http://127.0.0.1:{}/status'.format(port)
-            logging.debug("Trying to connect to server: " + url)
+    def test_captcha_ok(self):    
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)
+        # everything ok
+        r = self.client.get("/")
+        r = self.client.post("/", data={"s": "something", "captcha": str(r.data, 'utf-8')})
+        assert r.data == b"ok"
+
+    def test_captcha_replay(self):
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)
+
+        r = self.client.get("/")
+        captcha_value = str(r.data, 'utf-8')
+        
+        cookies = self.client.cookie_jar._cookies['localhost.local']['/']['session']        
+        r = self.client.post("/", data={"s": "something", "captcha": captcha_value})
+        assert r.data == b"ok"
+        self.client.set_cookie("localhost", "session", cookies.value)
+        r = self.client.post("/", data={"s": "something", "captcha": captcha_value})
+        assert r.data == b"nope"
+
+    def test_captcha_passthrough_when_disabled(self):
+        self.app.config["CAPTCHA_ENABLE"] = False
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)
+
+        r = self.client.post("/", data={"s": "something"})
+        assert r.data == b"ok"
+        r = self.client.get("/")
+        captcha_value = str(r.data, 'utf-8')        
+        r = self.client.post("/", data={"s": "something", "captcha": captcha_value})
+        assert r.data == b"ok"    
+        r = self.client.post("/", data={"s": "something", "captcha": "false"})
+        assert r.data == b"ok"
+        
+    def test_captcha_least_digits(self):
+        self.app.config["CAPTCHA_NUMERIC_DIGITS"] = 8
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)        
+
+        # everything ok    
+        r = self.client.get("http://localhost:5000/")
+        captcha_value = str(r.data, 'utf-8') 
+        assert len(captcha_value) == 8
+
+    def test_captcha_jinja_global(self):
+        captcha = FlaskSessionCaptcha(self.app)
+        with self.app.test_request_context('/') as client:
+            function = self.app.jinja_env.globals['captcha']
             try:
-                requests.get(url)
-                break
+                captcha.get_answer()
+                assert False
             except:
                 pass
+            img = function()
+            assert "<img" in img        
+            assert captcha.get_answer()
 
-    yield function
+    def test_captcha_jinja_global_empty_while_disabled(self):
+        self.app.config["CAPTCHA_ENABLE"] = False
+        captcha = FlaskSessionCaptcha(self.app)
+        with self.app.test_request_context('/') as client:
+            function = self.app.jinja_env.globals['captcha']
+            try:
+                captcha.get_answer()
+                assert False
+            except:
+                pass
+            img = function()
+            assert img == ""
 
-    if zzz.p:
-        zzz.p.terminate()
+    def test_captcha_warning_on_non_server_storage(self):            
+        self.app.config['SESSION_TYPE'] = 'null'        
+        Session(self.app)
+        with self.assertRaises(RuntimeWarning):
+            FlaskSessionCaptcha(self.app)
+        self.app.config['SESSION_TYPE'] = None       
+        Session(self.app)
+        with self.assertRaises(RuntimeWarning):
+            FlaskSessionCaptcha(self.app)
 
-def _default_app():
-    app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'aba'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/swbcommon-test-session.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SESSION_TYPE'] = 'sqlalchemy'
-    app.config['CAPTCHA_ENABLED'] = True
-    app.config['CAPTCHA_NUMERIC_DIGITS'] = 5
-    return app
+
+    def tearDown(self):
+        pass
+
 
 def _default_routes(captcha, app):
     @app.route("/", methods=["POST","GET"])
@@ -66,109 +137,12 @@ def _default_routes(captcha, app):
         captcha.generate()
         return str(captcha.get_answer())
 
-def test_captcha(run_app):    
-    app = _default_app()
-    captcha = FlaskSessionCaptcha(app)
-    _default_routes(captcha, app)
-    Session(app)
 
-    run_app(app, 5000)
-    logging.basicConfig(stream=sys.stderr, level="INFO")
 
-    # try without any session or csrf value
-    r = requests.post("http://localhost:5000/", data={"s": "something"})
-    assert r.text == "nope"
-    r = requests.post("http://localhost:5000/", data={"s": "something", "captcha": ""})
-    assert r.text == "nope"
-    r = requests.post("http://localhost:5000/", data={"s": "something", "captcha": "also wrong"})
-    assert r.text == "nope"
 
-    # without right cookie
-    r = requests.get("http://localhost:5000/")
-    r = requests.post("http://localhost:5000/", data={"s": "something", "captcha": r.text})
-    assert r.text == "nope" # no session
 
-    # everything ok
-    s = requests.Session()
-    r = s.get("http://localhost:5000/")
-    r = s.post("http://localhost:5000/", data={"s": "something", "captcha": r.text})
-    assert r.text == "ok"
 
-    # wrong number
-    s = requests.Session()
-    r = s.get("http://localhost:5000/")
-    r = s.post("http://localhost:5000/", data={"s": "something", "captcha": "wrong"})
-    assert r.text == "nope"
 
-def test_captcha_replay(run_app):
-    app = _default_app()
-    captcha = FlaskSessionCaptcha(app)
-    _default_routes(captcha, app)
-    Session(app)
 
-    run_app(app, 5000)
-    logging.basicConfig(stream=sys.stderr, level="INFO")
 
-    # everything ok    
-    r = requests.get("http://localhost:5000/")
-    captcha_value = r.text
-    cookies = r.cookies
-    r = requests.post("http://localhost:5000/", cookies=cookies, data={"s": "something", "captcha": captcha_value})
-    assert r.text == "ok"
-    r = requests.post("http://localhost:5000/", cookies=cookies, data={"s": "something", "captcha": captcha_value})
-    assert r.text == "nope"
-
-def test_captcha_passthrough_when_disabled(run_app):
-    app = _default_app()
-    app.config["CAPTCHA_ENABLED"] = False
-    captcha = FlaskSessionCaptcha(app)
-    _default_routes(captcha, app)
-    Session(app)
-
-    run_app(app, 5000)
-    logging.basicConfig(stream=sys.stderr, level="INFO")
-
-    # everything ok    
-    r = requests.get("http://localhost:5000/")
-    captcha_value = r.text
-    cookies = r.cookies
-    r = requests.post("http://localhost:5000/", cookies=cookies, data={"s": "something", "captcha": captcha_value})
-    assert r.text == "ok"
-    r = requests.get("http://localhost:5000/")
-
-    captcha_value = "false"
-    cookies = r.cookies
-    r = requests.post("http://localhost:5000/", cookies=cookies, data={"s": "something", "captcha": captcha_value})
-    assert r.text == "ok"
-
-def test_captcha_least_digits(run_app):
-    app = _default_app()
-    app.config["CAPTCHA_NUMERIC_DIGITS"] = 8
-    captcha = FlaskSessionCaptcha(app)
-    _default_routes(captcha, app)
-    Session(app)
-
-    run_app(app, 5000)
-    logging.basicConfig(stream=sys.stderr, level="INFO")
-
-    # everything ok    
-    r = requests.get("http://localhost:5000/")
-    captcha_value = r.text
-    assert len(captcha_value) == 8
-
-# def test_without_server(run_app):
-#     app = _default_app()
-#     app.config["CAPTCHA_NUMERIC_DIGITS"] = 8
-#     captcha = FlaskSessionCaptcha(app)
-#     run_app(app, 5000)
-
-#     captcha.generate()
-#     answer = captcha.get_answer()
-#     assert answer < 10**8
-#     assert not captcha.validate()
-#     session["captcha_answer"] = 2
-#     assert not captcha.validate()
-#     session["captcha_answer"] = answer
-#     assert captcha.validate()
-    
     
