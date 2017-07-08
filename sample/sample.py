@@ -1,14 +1,16 @@
 import logging
+import uuid
 from flask import Flask, request, render_template
 from flask_session import Session
 from flask_session_captcha import FlaskSessionCaptcha
 
 
+
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "9a4f5f6e-4973-40f0-b12f-bb87cefdb27b"
+app.config["SECRET_KEY"] = uuid.uuid4()
 app.config['CAPTCHA_ENABLE'] = True
 app.config['CAPTCHA_NUMERIC_DIGITS'] = 5
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/sessions.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 app.config['SESSION_TYPE'] = 'sqlalchemy'
 Session(app)
 captcha = FlaskSessionCaptcha(app)
