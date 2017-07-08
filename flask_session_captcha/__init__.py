@@ -30,6 +30,9 @@ class FlaskSessionCaptcha(object):
         session_type = app.config.get('SESSION_TYPE', None)
         if session_type is None or session_type == "null":
             raise RuntimeWarning("Flask-Session is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
+        elif session_type == "sqlalchemy":
+            # I have to do this as of version 0.3.1 of flask-session if using sqlalchemy as the session type in order to create the initial database.
+            self.app.session_interface.db.create_all() 
 
     def generate(self):
         """
@@ -69,4 +72,4 @@ class FlaskSessionCaptcha(object):
         """
         Shortcut function that returns the currently saved answer.
         """
-        return session['captcha_answer']
+        return session.get('captcha_answer', None)

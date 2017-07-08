@@ -90,11 +90,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         captcha = FlaskSessionCaptcha(self.app)
         with self.app.test_request_context('/') as client:
             function = self.app.jinja_env.globals['captcha']
-            try:
-                captcha.get_answer()
-                assert False
-            except:
-                pass
+            assert not captcha.get_answer()            
             img = function()
             assert "<img" in img        
             assert captcha.get_answer()
@@ -102,7 +98,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
     def test_captcha_jinja_global_empty_while_disabled(self):
         self.app.config["CAPTCHA_ENABLE"] = False
         captcha = FlaskSessionCaptcha(self.app)
-        with self.app.test_request_context('/') as client:
+        with self.app.test_request_context('/'):
             function = self.app.jinja_env.globals['captcha']
             try:
                 captcha.get_answer()

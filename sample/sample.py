@@ -11,10 +11,10 @@ app.config['CAPTCHA_NUMERIC_DIGITS'] = 5
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/sessions.db'
 app.config['SESSION_TYPE'] = 'sqlalchemy'
 Session(app)
+captcha = FlaskSessionCaptcha(app)
 
 @app.route('/', methods=['POST','GET'])
-def some_route():
-    captcha = FlaskSessionCaptcha(app)
+def some_route():    
     if request.method == "POST":
         if captcha.validate():
             return "success"
@@ -27,4 +27,3 @@ if __name__ == "__main__":
     app.debug = True
     logging.getLogger().setLevel("DEBUG")
     app.run()
-

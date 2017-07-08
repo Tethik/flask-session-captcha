@@ -4,10 +4,10 @@ A captcha implemention for flask
 ## Usage
 ```python
 app = Flask(__name__)
+captcha = FlaskSessionCaptcha(app)
 
 @app.route('/')
-def some_route():
-    captcha = FlaskSessionCaptcha(app)
+def some_route():    
     if request.method == "POST":
         if captcha.validate():
             return "success"
