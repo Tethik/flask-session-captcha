@@ -1,5 +1,5 @@
 # flask-session-captcha
-[![travis](https://travis-ci.org/Tethik/another-flask-captcha.svg)](https://travis-ci.org/Tethik/another-flask-captcha)
+[![Build Status](https://travis-ci.org/Tethik/another-flask-captcha.svg?branch=master)](https://travis-ci.org/Tethik/another-flask-captcha)
 [![codecov](https://codecov.io/gh/Tethik/another-flask-captcha/branch/master/graph/badge.svg)](https://codecov.io/gh/Tethik/another-flask-captcha)
 
 A captcha implemention for flask
