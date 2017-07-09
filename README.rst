@@ -10,7 +10,7 @@ flask-session-captcha
     :target: https://codecov.io/gh/Tethik/flask-session-captcha
     :alt: codecov
 
-.. image:: https://img.shields.io/pypi/v/nine.svg   
+.. image:: https://img.shields.io/pypi/v/flask-session-captcha.svg   
     :target: https://pypi.python.org/pypi/flask-session-captcha
     :alt: Latest version    
 
