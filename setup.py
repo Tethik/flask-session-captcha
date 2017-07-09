@@ -3,9 +3,7 @@ from distutils.command.install_data import install_data
 from setuptools import setup, find_packages
 
 VERSION = "1.0.0"
-with open("LICENSE") as f:
-    LICENSE = f.read()
-with open("README.md") as f:
+with open("README.rst") as f:
     README = f.read()
 
 setup(
@@ -17,7 +15,7 @@ setup(
         long_description=README,
         url='https://github.com/Tethik/flask-session-captcha',
         packages=['flask_session_captcha'],
-        package_data={'': ['LICENSE', 'README.md', 'DEVELOPMENT.md']},
+        package_data={'': ['LICENSE', 'README.rst', 'DEVELOPMENT.md']},
         install_requires=[
             'captcha',
             'flask-session',
@@ -44,5 +42,5 @@ setup(
             'Programming Language :: Python :: 3.6',
             'Topic :: Security',
         ],
-        license=LICENSE
+        license='MIT'
 )
