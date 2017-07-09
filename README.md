@@ -2,7 +2,15 @@
 [![Build Status](https://travis-ci.org/Tethik/another-flask-captcha.svg?branch=master)](https://travis-ci.org/Tethik/another-flask-captcha)
 [![codecov](https://codecov.io/gh/Tethik/another-flask-captcha/branch/master/graph/badge.svg)](https://codecov.io/gh/Tethik/another-flask-captcha)
 
-A captcha implemention for flask
+A captcha implemention for flask using [flask-session](https://github.com/fengsp/flask-session) and [captcha](https://pypi.python.org/pypi/captcha/0.2.3) packages. Each captcha challenge answer is saved in the server side session of the challenged client.
+
+For now it supports only simple numeric image captchas, but more could easily be added from the underlying [captcha package](https://pypi.python.org/pypi/captcha/0.2.3).
+
+## Requirements
+* Flask
+* Flask-Session
+    * ... and different packages depending on which SESSION_TYPE you use. E.g. sqlalchemy requires flask-sqlalchemy.
+* captcha
 
 ## Usage
 ```python
@@ -23,7 +31,7 @@ captcha = FlaskSessionCaptcha(app)
 @app.route('/')
 def some_route():    
     if request.method == "POST":
-        if captcha.validate():
+        if captcha.validate(): # This returns True if request.form["captcha"] has the right answer.
             return "success"
         else:
             return "fail"
@@ -35,7 +43,7 @@ Template can look as follows. `captcha.validate()` will be default try to valida
 
 ```html
 <form method="POST">
-    {{ captcha() }}
+    {{ captcha() }} <!-- This renders an <img> tag with the captcha img. -->
     <input type="text" name="captcha">
     <input type="submit">
 </form>

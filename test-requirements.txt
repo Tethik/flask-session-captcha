@@ -2,3 +2,4 @@ pytest
 requests
 parsel
 pytest-cov
+Flask-SQLAlchemy

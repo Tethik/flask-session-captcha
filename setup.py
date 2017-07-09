@@ -22,7 +22,6 @@ setup(
             'captcha',
             'flask-session',
             'flask',
-            'flask-SQLAlchemy',
         ],
         tests_require=[
             'pytest',
