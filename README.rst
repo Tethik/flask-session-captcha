@@ -2,12 +2,12 @@
 flask-session-captcha
 =====================
 
-.. image:: https://travis-ci.org/Tethik/flask-session-captcha.png?branch=master
-    :target: https://travis-ci.org/Tethik/flask-session-captcha
+.. image:: https://travis-ci.org/Tethik/another-flask-captcha.svg?branch=master
+    :target: https://travis-ci.org/Tethik/another-flask-captcha
     :alt: Travis-CI
 
-.. image:: https://codecov.io/gh/Tethik/flask-session-captcha/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/Tethik/flask-session-captcha
+.. image:: https://codecov.io/gh/Tethik/another-flask-captcha/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/Tethik/another-flask-captcha
     :alt: codecov
 
 .. image:: https://img.shields.io/pypi/v/nine.svg   
@@ -15,7 +15,7 @@ flask-session-captcha
     :alt: Latest version    
 
 .. image:: https://img.shields.io/pypi/pyversions/flask-session-captcha.svg
-    :target: https://pypi.python.org/pypi/flask-session-captcha/
+    :target: https://pypi.python.org/pypi/flask-session-captcha
     :alt: Supported python versions
     
 .. image:: https://img.shields.io/github/license/Tethik/flask-session-captcha.svg   
