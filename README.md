@@ -31,7 +31,7 @@ def some_route():
     return render_template("form.html")
 ```
 
-In the template:
+Template can look as follows. `captcha.validate()` will be default try to validate against a form input with name "captcha".
 
 ```html
 <form method="POST">

@@ -10,9 +10,7 @@ class FlaskSessionCaptcha(object):
     def __init__(self, app):
         self.app = app
         self.enabled = app.config.get("CAPTCHA_ENABLE", True)
-        logging.debug(self.enabled)
-        self.digits = app.config.get("CAPTCHA_NUMERIC_DIGITS", 4)
-        logging.debug(self.digits)
+        self.digits = app.config.get("CAPTCHA_LENGTH", 4)
         self.max = 10**self.digits
         self.image_generator = ImageCaptcha()
         self.rand = SystemRandom()        
@@ -52,21 +50,24 @@ class FlaskSessionCaptcha(object):
         return base64_captcha
 
 
-    def validate(self):
+    def validate(self, form_key="captcha", value=None):
         """
         Validate a captcha answer (taken from request.form) against the answer saved in the session.
-        Returns always true if CAPTCHA_ENABLED is set to False. Otherwise return true only if it is the correct answer.
+        Returns always true if CAPTCHA_ENABLE is set to False. Otherwise return true only if it is the correct answer.
         """
         if not self.enabled:
             return True
 
-        if "captcha" not in request.form or "captcha_answer" not in session or not session['captcha_answer']:
+        if "captcha_answer" not in session or not session['captcha_answer']:
             return False
+
         session_value = session['captcha_answer']
+        if not value and form_key in request.form:
+            value = request.form[form_key].strip()
 
         # invalidate the answer to stop new tries on the same challenge.
         session['captcha_answer'] = None
-        return request.form["captcha"].strip() == session_value
+        return value and value == session_value
 
     def get_answer(self):
         """

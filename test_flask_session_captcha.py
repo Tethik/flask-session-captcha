@@ -12,7 +12,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         self.app.config['SESSION_TYPE'] = 'sqlalchemy'
         self.app.config['CAPTCHA_ENABLE'] = True
-        self.app.config['CAPTCHA_NUMERIC_DIGITS'] = 5
+        self.app.config['CAPTCHA_LENGTH'] = 5
         self.app.testing = True
         Session(self.app)
 
@@ -77,18 +77,30 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         assert r.data == b"ok"
         
     def test_captcha_least_digits(self):
-        self.app.config["CAPTCHA_NUMERIC_DIGITS"] = 8
+        self.app.config["CAPTCHA_LENGTH"] = 8
         captcha = FlaskSessionCaptcha(self.app)
         _default_routes(captcha, self.app)        
 
-        # everything ok    
         r = self.client.get("http://localhost:5000/")
         captcha_value = r.data.decode('utf-8')
         assert len(captcha_value) == 8
 
+    def test_captcha_validate_value(self):        
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)        
+
+        with self.app.test_request_context('/'):
+            captcha.generate()
+            answer = captcha.get_answer()
+            assert not captcha.validate(value="wrong")
+            captcha.generate()
+            answer = captcha.get_answer()
+            assert captcha.validate(value=answer)
+
+
     def test_captcha_jinja_global(self):
         captcha = FlaskSessionCaptcha(self.app)
-        with self.app.test_request_context('/') as client:
+        with self.app.test_request_context('/'):
             function = self.app.jinja_env.globals['captcha']
             assert not captcha.get_answer()            
             img = function()
@@ -118,6 +130,15 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         with self.assertRaises(RuntimeWarning):
             FlaskSessionCaptcha(self.app)
 
+    def test_captcha_session_file_storage(self):
+        self.app.config['SESSION_TYPE'] = 'filesystem'        
+        Session(self.app)
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)
+
+        r = self.client.get("/")
+        r = self.client.post("/", data={"s": "something", "captcha": r.data.decode('utf-8')})
+        assert r.data == b"ok"
 
     def tearDown(self):
         pass
