@@ -15,6 +15,7 @@ For now it supports only simple numeric image captchas, but more could easily be
 ## Usage
 ```python
 import uuid
+import logging
 from flask import Flask, request, render_template
 from flask_session import Session
 from flask_session_captcha import FlaskSessionCaptcha
@@ -28,15 +29,21 @@ app.config['SESSION_TYPE'] = 'sqlalchemy'
 Session(app)
 captcha = FlaskSessionCaptcha(app)
 
-@app.route('/')
+@app.route('/', methods=['POST','GET'])
 def some_route():    
     if request.method == "POST":
-        if captcha.validate(): # This returns True if request.form["captcha"] has the right answer.
+        if captcha.validate():
             return "success"
         else:
             return "fail"
 
     return render_template("form.html")
+
+if __name__ == "__main__":
+    app.debug = True
+    logging.getLogger().setLevel("DEBUG")
+    app.run()
+
 ```
 
 Template can look as follows. `captcha.validate()` will be default try to validate against a form input with name "captcha".
