@@ -18,13 +18,13 @@ setup(
         package_data={'': ['LICENSE', 'README.rst', 'DEVELOPMENT.md']},
         install_requires=[
             'captcha',
-            'flask-session',
-            'flask',
+            'Flask-Session',
+            'Flask',
         ],
         tests_require=[
             'pytest',
             'pytest-cov',
-            'flask-sqlalchemy',
+            'Flask-SQLAlchemy',
         ],
         classifiers=[
             'Development Status :: 4 - Beta',
