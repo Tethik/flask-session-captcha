@@ -7,8 +7,12 @@ from flask import session, request, Markup
 
 class FlaskSessionCaptcha(object):
 
-    def __init__(self, app):
+    def __init__(self, app=None):
         self.app = app
+        if app is not None:
+            self.init_app(app)
+    
+    def init_app(self, app):
         self.enabled = app.config.get("CAPTCHA_ENABLE", True)
         self.digits = app.config.get("CAPTCHA_LENGTH", 4)
         self.max = 10**self.digits
@@ -30,7 +34,8 @@ class FlaskSessionCaptcha(object):
             raise RuntimeWarning("Flask-Session is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
         elif session_type == "sqlalchemy":
             # I have to do this as of version 0.3.1 of flask-session if using sqlalchemy as the session type in order to create the initial database.
-            self.app.session_interface.db.create_all() 
+            self.app.session_interface.db.create_all()
+            
 
     def generate(self):
         """
@@ -58,10 +63,10 @@ class FlaskSessionCaptcha(object):
         if not self.enabled:
             return True
 
-        if "captcha_answer" not in session or not session['captcha_answer']:
+        session_value = session.get('captcha_answer', None)
+        if not session_value:
             return False
-
-        session_value = session['captcha_answer']
+        
         if not value and form_key in request.form:
             value = request.form[form_key].strip()
 
