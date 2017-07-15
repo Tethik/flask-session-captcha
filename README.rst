@@ -22,16 +22,15 @@ flask-session-captcha
     :target: https://github.com/Tethik/flask-session-captcha/blob/master/LICENSE
 
 
-A captcha implemention for flask using `flask-session <https://github.com/fengsp/flask-session>`__ and `captcha <https://pypi.python.org/pypi/captcha/0.2.3>`__ packages. Each captcha challenge answer is saved in the server side session of the challenged client.
+A captcha implemention for flask using `flask-session <https://pypi.python.org/pypi/Flask-Session/>`__ and `captcha <https://pypi.python.org/pypi/captcha/>`__ packages. Each captcha challenge answer is saved in the server side session of the challenged client.
 
-For now it supports only simple numeric image captchas, but more could easily be added from the underlying `captcha package <https://pypi.python.org/pypi/captcha/0.2.3>`__.
+For now it supports only simple numeric image captchas, but more could easily be added from the underlying `captcha package <https://pypi.python.org/pypi/captcha/>`__.
 
 Requirements
 ------------
-* Flask
-* Flask-Session
-    * ... and different packages depending on which SESSION_TYPE you use. E.g. sqlalchemy requires flask-sqlalchemy.
-* captcha
+* `Flask <https://pypi.python.org/pypi/Flask/>`__
+* `flask-session <https://pypi.python.org/pypi/Flask-Session/>`__ with packages depending on which SESSION_TYPE you use. E.g. sqlalchemy requires flask-sqlalchemy.
+* `captcha <https://pypi.python.org/pypi/captcha/>`__
 
 Usage
 -----
