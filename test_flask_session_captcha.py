@@ -140,6 +140,15 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         r = self.client.post("/", data={"s": "something", "captcha": r.data.decode('utf-8')})
         assert r.data == b"ok"
 
+    def test_captcha_with_init_app_ok(self):    
+        captcha = FlaskSessionCaptcha()
+        _default_routes(captcha, self.app)
+        captcha.init_app(self.app)
+        # everything ok
+        r = self.client.get("/")
+        r = self.client.post("/", data={"s": "something", "captcha": r.data.decode('utf-8')})
+        assert r.data == b"ok"
+
     def tearDown(self):
         pass
 

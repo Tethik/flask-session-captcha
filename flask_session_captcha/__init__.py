@@ -8,24 +8,26 @@ from flask import session, request, Markup
 class FlaskSessionCaptcha(object):
 
     def __init__(self, app=None):
-        self.app = app
         if app is not None:
             self.init_app(app)
     
     def init_app(self, app):
+        """
+        Initialize the captcha extension to the given app object.
+        """
         self.enabled = app.config.get("CAPTCHA_ENABLE", True)
         self.digits = app.config.get("CAPTCHA_LENGTH", 4)
         self.max = 10**self.digits
         self.image_generator = ImageCaptcha()
-        self.rand = SystemRandom()        
-        
-        def generate():
+        self.rand = SystemRandom()
+
+        def _generate():
             if not self.enabled:
                 return ""
             base64_captcha = self.generate()
             return Markup("<img src='{}'>".format("data:image/png;base64, {}".format(base64_captcha)))
 
-        self.app.jinja_env.globals['captcha'] = generate
+        app.jinja_env.globals['captcha'] = _generate
         
         # Check for sessions that do not persist on the server. Issue a warning because they are most likely open to replay attacks.
         # This addon is built upon flask-session.
@@ -34,7 +36,7 @@ class FlaskSessionCaptcha(object):
             raise RuntimeWarning("Flask-Session is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
         elif session_type == "sqlalchemy":
             # I have to do this as of version 0.3.1 of flask-session if using sqlalchemy as the session type in order to create the initial database.
-            self.app.session_interface.db.create_all()
+            app.session_interface.db.create_all()
             
 
     def generate(self):
