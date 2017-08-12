@@ -33,9 +33,10 @@ class FlaskSessionCaptcha(object):
         # This addon is built upon flask-session.
         session_type = app.config.get('SESSION_TYPE', None)
         if session_type is None or session_type == "null":
-            raise RuntimeWarning("Flask-Session is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
+            raise RuntimeWarning("Flask-Sessionstore is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
         elif session_type == "sqlalchemy":
             # I have to do this as of version 0.3.1 of flask-session if using sqlalchemy as the session type in order to create the initial database.
+            # Flask-sessionstore seems to have the same problem. 
             app.session_interface.db.create_all()
             
 

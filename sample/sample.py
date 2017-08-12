@@ -1,7 +1,7 @@
 import logging
 import uuid
 from flask import Flask, request, render_template
-from flask_session import Session
+from flask_sessionstore import Session
 from flask_session_captcha import FlaskSessionCaptcha
 
 

@@ -2,7 +2,7 @@ from distutils.command.install_data import install_data
 
 from setuptools import setup, find_packages
 
-VERSION = "1.0.3"
+VERSION = "1.1.0"
 with open("README.rst") as f:
     README = f.read()
 
@@ -18,7 +18,6 @@ setup(
         package_data={'': ['LICENSE', 'README.rst', 'DEVELOPMENT.md']},
         install_requires=[
             'captcha',
-            'Flask-Session',
             'Flask',
         ],
         tests_require=[
