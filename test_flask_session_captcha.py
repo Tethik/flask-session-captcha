@@ -1,7 +1,7 @@
 import unittest
 from flask_session_captcha import FlaskSessionCaptcha
 from flask import Flask, request
-from flask_session import Session
+from flask_sessionstore import Session
 from werkzeug.test import Headers
 
 class FlaskSessionCaptchaTestCase(unittest.TestCase):

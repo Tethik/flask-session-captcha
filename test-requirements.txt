@@ -3,3 +3,4 @@ requests
 parsel
 pytest-cov
 Flask-SQLAlchemy
+Flask-Sessionstore>=0.4.5
