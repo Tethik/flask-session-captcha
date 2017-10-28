@@ -1,0 +1,25 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[dev-packages]
+
+
+
+[packages]
+
+jupyter = "*"
+flask-session-captcha = "*"
+setuptools = "*"
+flask = "*"
+flask-sessionstore = "*"
+flask-sqlalchemy = "*"
+mysqlclient = "*"
+
+
+[requires]
+
+python_version = "3.6"

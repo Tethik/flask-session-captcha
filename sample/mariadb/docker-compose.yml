@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  mysql:
+    restart: always
+    image: mariadb
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "mypassword"
+      MYSQL_DATABASE: "test"
