@@ -45,7 +45,7 @@ Usage
     app = Flask(__name__)
     app.config["SECRET_KEY"] = uuid.uuid4()
     app.config['CAPTCHA_ENABLE'] = True
-    app.config['CAPTCHA_NUMERIC_DIGITS'] = 5
+    app.config['CAPTCHA_LENGTH'] = 5
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
     app.config['SESSION_TYPE'] = 'sqlalchemy'
     Session(app)
