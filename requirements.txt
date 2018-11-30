@@ -1,5 +1,5 @@
 captcha>=0.2.1
-click==6.7
+click==7.0
 Flask>=0.12.3
 
 itsdangerous==1.1
