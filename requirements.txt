@@ -1,6 +1,6 @@
 captcha>=0.2.1
 click==6.7
-Flask>=0.12.2
+Flask>=0.12.3
 
 itsdangerous==1.1
 Jinja2==2.10
