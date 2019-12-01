@@ -17,8 +17,17 @@ class FlaskSessionCaptcha(object):
         """
         self.enabled = app.config.get("CAPTCHA_ENABLE", True)
         self.digits = app.config.get("CAPTCHA_LENGTH", 4)
+        self.width = app.config.get("CAPTCHA_WIDTH", None)
+        self.height = app.config.get("CAPTCHA_HEIGHT", None)
         self.max = 10**self.digits
-        self.image_generator = ImageCaptcha()
+        
+        xargs = {}
+        if self.height:
+            xargs['height'] = self.height
+        if self.width:
+            xargs['width'] = self.width
+        
+        self.image_generator = ImageCaptcha(**xargs)
         self.rand = SystemRandom()
 
         def _generate():

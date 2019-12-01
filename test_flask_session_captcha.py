@@ -97,7 +97,6 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
             answer = captcha.get_answer()
             assert captcha.validate(value=answer)
 
-
     def test_captcha_jinja_global(self):
         captcha = FlaskSessionCaptcha(self.app)
         with self.app.test_request_context('/'):
@@ -145,6 +144,26 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         _default_routes(captcha, self.app)
         captcha.init_app(self.app)
         # everything ok
+        r = self.client.get("/")
+        r = self.client.post("/", data={"s": "something", "captcha": r.data.decode('utf-8')})
+        assert r.data == b"ok"
+
+    def test_captcha_with_undefined_width_and_height(self):    
+        self.app.config['CAPTCHA_WIDTH'] = None
+        self.app.config['CAPTCHA_HEIGHT'] = None
+        captcha = FlaskSessionCaptcha()
+        _default_routes(captcha, self.app)
+        captcha.init_app(self.app)
+        r = self.client.get("/")
+        r = self.client.post("/", data={"s": "something", "captcha": r.data.decode('utf-8')})
+        assert r.data == b"ok"
+
+    def test_captcha_with_defined_width_and_height(self):    
+        self.app.config['CAPTCHA_WIDTH'] = 400
+        self.app.config['CAPTCHA_HEIGHT'] = 150
+        captcha = FlaskSessionCaptcha()
+        _default_routes(captcha, self.app)
+        captcha.init_app(self.app)
         r = self.client.get("/")
         r = self.client.post("/", data={"s": "something", "captcha": r.data.decode('utf-8')})
         assert r.data == b"ok"
