@@ -1,20 +1,17 @@
 sudo: true
 language: python
 python:
-  - "2.7"
-  - "3.4"
   - "3.5"
   - "3.6"
-#  - "nightly" # currently points to 3.7-dev
+  - "3.7"
 
 before_install:
   - pip install codecov
+  - pip install pipenv
 
 # command to install dependencies
-install: 
-  - pip install -e .
-  - pip install -r requirements.txt
-  - pip install -r test-requirements.txt
+install:   
+  - pipenv install --dev --system
 
 # command to run tests
 script: 
