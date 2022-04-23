@@ -17,8 +17,8 @@ class FlaskSessionCaptcha(object):
         """
         self.enabled = app.config.get("CAPTCHA_ENABLE", True)
         self.digits = app.config.get("CAPTCHA_LENGTH", 4)
-        self.width = app.config.get("CAPTCHA_WIDTH", None)
-        self.height = app.config.get("CAPTCHA_HEIGHT", None)
+        self.width = app.config.get("CAPTCHA_WIDTH")
+        self.height = app.config.get("CAPTCHA_HEIGHT")
         self.max = 10**self.digits
         
         xargs = {}
@@ -75,7 +75,7 @@ class FlaskSessionCaptcha(object):
         if not self.enabled:
             return True
 
-        session_value = session.get('captcha_answer', None)
+        session_value = session.get('captcha_answer')
         if not session_value:
             return False
         
@@ -90,4 +90,4 @@ class FlaskSessionCaptcha(object):
         """
         Shortcut function that returns the currently saved answer.
         """
-        return session.get('captcha_answer', None)
+        return session.get('captcha_answer')
