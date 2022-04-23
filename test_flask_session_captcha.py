@@ -98,7 +98,13 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         with self.app.test_request_context('/'):
             captcha.generate()
             answer = captcha.get_answer()
-            assert not captcha.validate(value="wrong")
+            assert captcha.validate(value=None) == False
+            captcha.generate()
+            answer = captcha.get_answer()
+            assert captcha.validate(value="") == False
+            captcha.generate()
+            answer = captcha.get_answer()
+            assert captcha.validate(value="wrong") == False
             captcha.generate()
             answer = captcha.get_answer()
             assert captcha.validate(value=answer)
