@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 with open("README.rst") as f:
     README = f.read()
 
@@ -13,7 +13,7 @@ setup(
     long_description=README,
     url='https://github.com/Tethik/flask-session-captcha',
     packages=['flask_session_captcha'],
-    package_data={'': ['LICENSE', 'README.rst', 'DEVELOPMENT.md']},
+    package_data={'': ['LICENSE', 'README.rst']},
     install_requires=[
         'captcha',
         'Flask',
