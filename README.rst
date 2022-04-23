@@ -2,14 +2,6 @@
 flask-session-captcha
 =====================
 
-.. image:: https://travis-ci.org/Tethik/flask-session-captcha.svg?branch=master
-    :target: https://travis-ci.org/Tethik/flask-session-captcha
-    :alt: Travis-CI
-
-.. image:: https://codecov.io/gh/Tethik/flask-session-captcha/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/Tethik/flask-session-captcha
-    :alt: codecov
-
 .. image:: https://img.shields.io/pypi/v/flask-session-captcha.svg   
     :target: https://pypi.python.org/pypi/flask-session-captcha
     :alt: Latest version    

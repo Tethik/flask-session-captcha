@@ -11,6 +11,8 @@ rope = "*"
 flask-sessionstore = "*"
 flask-session-captcha = {editable = true,path = "."}
 flask-sqlalchemy = "*"
+flake8 = "*"
+autopep8 = "*"
 
 [packages]
 captcha = "*"
@@ -22,4 +24,4 @@ Jinja2 = "*"
 MarkupSafe = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"
