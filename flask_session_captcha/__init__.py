@@ -84,7 +84,7 @@ class FlaskSessionCaptcha(object):
 
         # invalidate the answer to stop new tries on the same challenge.
         session['captcha_answer'] = None
-        return value and value == session_value
+        return value is not None and value == session_value
 
     def get_answer(self):
         """
