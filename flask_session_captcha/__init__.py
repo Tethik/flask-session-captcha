@@ -5,12 +5,13 @@ import logging
 from captcha.image import ImageCaptcha
 from flask import session, request, Markup
 
+
 class FlaskSessionCaptcha(object):
 
     def __init__(self, app=None):
         if app is not None:
             self.init_app(app)
-    
+
     def init_app(self, app):
         """
         Initialize the captcha extension to the given app object.
@@ -20,13 +21,13 @@ class FlaskSessionCaptcha(object):
         self.width = app.config.get("CAPTCHA_WIDTH")
         self.height = app.config.get("CAPTCHA_HEIGHT")
         self.max = 10**self.digits
-        
+
         xargs = {}
         if self.height:
             xargs['height'] = self.height
         if self.width:
             xargs['width'] = self.width
-        
+
         self.image_generator = ImageCaptcha(**xargs)
         self.rand = SystemRandom()
 
@@ -37,17 +38,17 @@ class FlaskSessionCaptcha(object):
             return Markup("<img src='{}'>".format("data:image/png;base64, {}".format(base64_captcha)))
 
         app.jinja_env.globals['captcha'] = _generate
-        
-        # Check for sessions that do not persist on the server. Issue a warning because they are most likely open to replay attacks.
-        # This addon is built upon flask-session.
+
+        # Check for sessions that do not persist on the server. Issue a warning because
+        # they are most likely open to replay attacks. This addon is built upon flask-session.
         session_type = app.config.get('SESSION_TYPE', None)
         if session_type is None or session_type == "null":
-            raise RuntimeWarning("Flask-Sessionstore is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
+            raise RuntimeWarning(
+                "Flask-Sessionstore is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
         elif session_type == "sqlalchemy":
             # I have to do this as of version 0.3.1 of flask-session if using sqlalchemy as the session type in order to create the initial database.
-            # Flask-sessionstore seems to have the same problem. 
+            # Flask-sessionstore seems to have the same problem.
             app.session_interface.db.create_all()
-            
 
     def generate(self):
         """
@@ -57,15 +58,15 @@ class FlaskSessionCaptcha(object):
 
         src = captcha.generate()
         <img src="{{src}}">
-        """                
+        """
         answer = self.rand.randrange(self.max)
-        answer = str(answer).zfill(self.digits)        
+        answer = str(answer).zfill(self.digits)
         image_data = self.image_generator.generate(answer)
-        base64_captcha = base64.b64encode(image_data.getvalue()).decode("ascii")
+        base64_captcha = base64.b64encode(
+            image_data.getvalue()).decode("ascii")
         logging.debug('Generated captcha with answer: ' + answer)
         session['captcha_answer'] = answer
         return base64_captcha
-
 
     def validate(self, form_key="captcha", value=None):
         """
@@ -78,7 +79,7 @@ class FlaskSessionCaptcha(object):
         session_value = session.get('captcha_answer')
         if not session_value:
             return False
-        
+
         if not value and form_key in request.form:
             value = request.form[form_key].strip()
 
