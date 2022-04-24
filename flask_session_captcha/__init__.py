@@ -41,7 +41,7 @@ class FlaskSessionCaptcha(object):
 
         # Check for sessions that do not persist on the server. Issue a warning because
         # they are most likely open to replay attacks. This addon is built upon flask-session.
-        session_type = app.config.get('SESSION_TYPE', None)
+        session_type = app.config.get('SESSION_TYPE')
         if session_type is None or session_type == "null":
             raise RuntimeWarning(
                 "Flask-Sessionstore is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
