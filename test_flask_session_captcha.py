@@ -1,6 +1,6 @@
 import unittest
 from flask_session_captcha import FlaskSessionCaptcha
-from flask import Flask, request
+from flask import Flask, request, session
 from flask_sessionstore import Session
 
 
@@ -12,6 +12,7 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         self.app.config['SESSION_TYPE'] = 'sqlalchemy'
         self.app.config['CAPTCHA_ENABLE'] = True
+        self.app.config['CAPTCHA_SESSION_KEY'] = 'captcha_answer'
         self.app.config['CAPTCHA_LENGTH'] = 5
         self.app.testing = True
         Session(self.app)
@@ -108,6 +109,28 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
             captcha.generate()
             answer = captcha.get_answer()
             assert captcha.validate(value=answer)
+
+    def test_captcha_session_key_can_be_set(self):
+        captcha = FlaskSessionCaptcha(self.app)
+        new_session_key = 'other-key-in-session'
+        captcha.session_key = new_session_key
+        _default_routes(captcha, self.app)
+
+        with self.app.test_request_context('/'):
+            captcha.generate()
+            answer = captcha.get_answer()
+            assert not session.get(self.app.config['CAPTCHA_SESSION_KEY'])
+            assert session.get(new_session_key) == answer
+
+    def test_captcha_session_key_default(self):
+        captcha = FlaskSessionCaptcha(self.app)
+        _default_routes(captcha, self.app)
+
+        with self.app.test_request_context('/'):
+            captcha.generate()
+            answer = captcha.get_answer()
+            assert self.app.config['CAPTCHA_SESSION_KEY'] == "captcha_answer"
+            assert session.get("captcha_answer") == answer
 
     def test_captcha_jinja_global(self):
         captcha = FlaskSessionCaptcha(self.app)

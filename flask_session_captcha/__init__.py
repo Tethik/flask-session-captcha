@@ -20,7 +20,8 @@ class FlaskSessionCaptcha(object):
         self.digits = app.config.get("CAPTCHA_LENGTH", 4)
         self.width = app.config.get("CAPTCHA_WIDTH")
         self.height = app.config.get("CAPTCHA_HEIGHT")
-        self.session_key = app.config.get("CAPTCHA_SESSION_KEY", "captcha_answer")
+        self.session_key = app.config.get(
+            "CAPTCHA_SESSION_KEY", "captcha_answer")
         self.max = 10**self.digits
 
         xargs = {}
@@ -63,7 +64,8 @@ class FlaskSessionCaptcha(object):
         answer = self.rand.randrange(self.max)
         answer = str(answer).zfill(self.digits)
         image_data = self.image_generator.generate(answer)
-        base64_captcha = base64.b64encode(image_data.getvalue()).decode("ascii")
+        base64_captcha = base64.b64encode(
+            image_data.getvalue()).decode("ascii")
         logging.debug('Generated captcha with answer: ' + answer)
         session[self.session_key] = answer
         return base64_captcha
