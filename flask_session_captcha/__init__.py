@@ -20,6 +20,7 @@ class FlaskSessionCaptcha(object):
         self.digits = app.config.get("CAPTCHA_LENGTH", 4)
         self.width = app.config.get("CAPTCHA_WIDTH")
         self.height = app.config.get("CAPTCHA_HEIGHT")
+        self.session_key = app.config.get("CAPTCHA_SESSION_KEY", "captcha_answer")
         self.max = 10**self.digits
 
         xargs = {}
@@ -53,7 +54,7 @@ class FlaskSessionCaptcha(object):
     def generate(self):
         """
         Generates and returns a numeric captcha image in base64 format. 
-        Saves the correct answer in `session['captcha_answer']`
+        Saves the correct answer in `session[self.session_key]`
         Use later as:
 
         src = captcha.generate()
@@ -62,10 +63,9 @@ class FlaskSessionCaptcha(object):
         answer = self.rand.randrange(self.max)
         answer = str(answer).zfill(self.digits)
         image_data = self.image_generator.generate(answer)
-        base64_captcha = base64.b64encode(
-            image_data.getvalue()).decode("ascii")
+        base64_captcha = base64.b64encode(image_data.getvalue()).decode("ascii")
         logging.debug('Generated captcha with answer: ' + answer)
-        session['captcha_answer'] = answer
+        session[self.session_key] = answer
         return base64_captcha
 
     def validate(self, form_key="captcha", value=None):
@@ -76,7 +76,7 @@ class FlaskSessionCaptcha(object):
         if not self.enabled:
             return True
 
-        session_value = session.get('captcha_answer')
+        session_value = session.get(self.session_key)
         if not session_value:
             return False
 
@@ -84,11 +84,11 @@ class FlaskSessionCaptcha(object):
             value = request.form[form_key].strip()
 
         # invalidate the answer to stop new tries on the same challenge.
-        session['captcha_answer'] = None
+        session[self.session_key] = None
         return value is not None and value == session_value
 
     def get_answer(self):
         """
         Shortcut function that returns the currently saved answer.
         """
-        return session.get('captcha_answer')
+        return session.get(self.session_key)

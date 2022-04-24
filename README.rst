@@ -41,12 +41,14 @@ Usage
     app.config['CAPTCHA_WIDTH'] = 160
     app.config['CAPTCHA_HEIGHT'] = 60
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
+    # In case you want to use another key in your session to store the captcha:
+    app.config['CAPTCHA_SESSION_KEY'] = 'captcha_image'
     app.config['SESSION_TYPE'] = 'sqlalchemy'
     Session(app)
     captcha = FlaskSessionCaptcha(app)
 
     @app.route('/', methods=['POST','GET'])
-    def some_route():    
+    def some_route():
         if request.method == "POST":
             if captcha.validate():
                 return "success"
