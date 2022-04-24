@@ -141,17 +141,6 @@ class FlaskSessionCaptchaTestCase(unittest.TestCase):
         with self.assertRaises(RuntimeWarning):
             FlaskSessionCaptcha(self.app)
 
-    def test_captcha_session_file_storage(self):
-        self.app.config['SESSION_TYPE'] = 'filesystem'
-        Session(self.app)
-        captcha = FlaskSessionCaptcha(self.app)
-        _default_routes(captcha, self.app)
-
-        r = self.client.get("/")
-        r = self.client.post(
-            "/", data={"s": "something", "captcha": r.data.decode('utf-8')})
-        assert r.data == b"ok"
-
     def test_captcha_with_init_app_ok(self):
         captcha = FlaskSessionCaptcha()
         _default_routes(captcha, self.app)
