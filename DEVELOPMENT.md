@@ -5,8 +5,7 @@ pytest --cov=flask_session_captcha --cov-report=term-missing
 ```
 
 ## Releasing to pypi
-```bash
-python setup.py bdist_wheel
-gpg --detach-sign -a dist/<the newly created wheel>
-twine 
-```
+1. Bump `VERSION` in setup.py
+2. Git tag `v` + VERSION
+3. Create release on github
+4. Github action handles the rest :)
