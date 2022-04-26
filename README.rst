@@ -73,3 +73,13 @@ Template can look as follows. `captcha.validate()` will be default try to valida
         <input type="text" name="captcha">
         <input type="submit">
     </form>
+
+It can also take a `css_class` argument to add classes to the generated DOM:
+
+.. code-block:: html
+
+    <form method="POST">
+        {{ captcha(css_class="captcha") }}
+        <input type="text" name="captcha">
+        <input type="submit">
+    </form>
