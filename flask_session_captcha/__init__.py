@@ -33,11 +33,14 @@ class FlaskSessionCaptcha(object):
         self.image_generator = ImageCaptcha(**xargs)
         self.rand = SystemRandom()
 
-        def _generate():
+        def _generate(css_class=None):
             if not self.enabled:
                 return ""
             base64_captcha = self.generate()
-            return Markup("<img src='{}'>".format("data:image/png;base64, {}".format(base64_captcha)))
+            data = "data:image/png;base64, {}".format(base64_captcha)
+            if css_class is not None:
+                return Markup("<img src='{}' class='{}'>".format(data, css_class))
+            return Markup("<img src='{}'>".format(data))
 
         app.jinja_env.globals['captcha'] = _generate
 
