@@ -17,6 +17,7 @@ setup(
     install_requires=[
         'captcha',
         'Flask',
+        'markupsafe',
     ],
     tests_require=[
         'flake8',
