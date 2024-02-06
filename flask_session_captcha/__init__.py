@@ -65,7 +65,10 @@ class FlaskSessionCaptcha(BaseConfig):
         self.width = app.config.get("CAPTCHA_WIDTH", self.width)
         self.height = app.config.get("CAPTCHA_HEIGHT", self.height)
         self.session_key = app.config.get("CAPTCHA_SESSION_KEY", self.session_key)
-        self.image_generator = ImageCaptcha({'width': self.width, 'height': self.height})
+        self.image_generator = ImageCaptcha(**{'width': self.width, 'height': self.height})
+        self.include_alphabet = app.config.get("CAPTCHA_INCLUDE_ALPHABET", self.include_alphabet)
+        self.include_numeric = app.config.get("CAPTCHA_INCLUDE_NUMERIC", self.include_numeric)
+        self.include_punctuation = app.config.get("CAPTCHA_INCLUDE_PUNCTUATION", self.include_punctuation)
 
 
         def _generate(*args, **kwargs) -> Markup:
