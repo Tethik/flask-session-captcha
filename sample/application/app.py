@@ -13,12 +13,12 @@ app.config["SECRET_KEY"] = uuid.uuid4().hex
 
 # captcha config
 app.config['CAPTCHA_ENABLE'] = True
-app.config['CAPTCHA_LENGTH'] = 6
+app.config['CAPTCHA_LENGTH'] = 2
 app.config["CAPTCHA_WIDTH"] = 200
 app.config["CAPTCHA_HEIGHT"] = 160
-app.config['CAPTCHA_LETTERS'] = True # include letters
-app.config['CAPTCHA_ALPHABET'] = True # include alphabet chart
-app.config['CAPTCHA_PUNCTUATION'] = False # include symbols
+app.config['CAPTCHA_INCLUDE_ALPHABET'] = True # include alphabet<letters>
+app.config['CAPTCHA_INCLUDE_NUMERIC'] = False # include numeric
+app.config['CAPTCHA_INCLUDE_PUNCTUATION'] = True # include symbols
 
 
 # session config
