@@ -1,80 +1,141 @@
+# build in
 import base64
-from random import SystemRandom
-import logging
+import random
+import string
 
+# lib
 from captcha.image import ImageCaptcha
-from flask import session, request
+from flask import session, request, Flask
 from markupsafe import Markup
 
+# flask_session_captcha
+from . import exception as ex
+from . import logger as Log
 
-class FlaskSessionCaptcha(object):
 
-    def __init__(self, app=None):
-        if app is not None:
-            self.init_app(app)
+class BaseConfig:
+    """ Default configs """
+    enabled: bool = True
+    length: int = 4  # minimum length
+    session_key: str = "captcha_answer"
+    image_generator: ImageCaptcha = None
 
-    def init_app(self, app):
+    width: int = 180,
+    height: int = 80,
+
+    _alphabet:str = string.ascii_lowercase
+    _punctuation:str = string.punctuation
+    _numbers :str= string.digits
+
+    include_alphabet:bool = True
+    include_numeric:bool = True
+    include_punctuation:bool = False
+
+
+    def random_number(self, length: int) -> list:
+        return random.choices(self._numbers, k=length)
+
+    def random_punctuation(self, length: int) -> list:
+        return random.choices(self._punctuation, k=length)
+
+    def random_alphabet(self, length: int) -> list:
+        return random.choices(self._alphabet, k=length)
+
+    def shuffle_list(self, list_captcha: list) -> None:
+        random.shuffle(list_captcha)
+
+
+class FlaskSessionCaptcha(BaseConfig):
+
+    def __init__(self, app: Flask = None):
+        if not isinstance(app, Flask):
+            raise ex.NotFlaskApp(f"object {app} not a Flask instance.")
+
+        self.init_app(app)
+        self.Logger = Log.get_logger()
+
+    def init_app(self, app: Flask):
         """
         Initialize the captcha extension to the given app object.
+
+        :param app: Flask Object
         """
-        self.enabled = app.config.get("CAPTCHA_ENABLE", True)
-        self.digits = app.config.get("CAPTCHA_LENGTH", 4)
-        self.width = app.config.get("CAPTCHA_WIDTH")
-        self.height = app.config.get("CAPTCHA_HEIGHT")
-        self.session_key = app.config.get(
-            "CAPTCHA_SESSION_KEY", "captcha_answer")
-        self.max = 10**self.digits
+        self.enabled = app.config.get("CAPTCHA_ENABLE", self.enabled)
+        self.length = app.config.get("CAPTCHA_LENGTH", self.length)
+        self.width = app.config.get("CAPTCHA_WIDTH", self.width)
+        self.height = app.config.get("CAPTCHA_HEIGHT", self.height)
+        self.session_key = app.config.get("CAPTCHA_SESSION_KEY", self.session_key)
+        self.image_generator = ImageCaptcha({'width': self.width, 'height': self.height})
 
-        xargs = {}
-        if self.height:
-            xargs['height'] = self.height
-        if self.width:
-            xargs['width'] = self.width
 
-        self.image_generator = ImageCaptcha(**xargs)
-        self.rand = SystemRandom()
-
-        def _generate(css_class=None):
+        def _generate(*args, **kwargs) -> Markup:
+            """Generate Captcha Image"""
             if not self.enabled:
-                return ""
-            base64_captcha = self.generate()
-            data = "data:image/png;base64, {}".format(base64_captcha)
-            if css_class is not None:
-                return Markup("<img src='{}' class='{}'>".format(data, css_class))
-            return Markup("<img src='{}'>".format(data))
+                return Markup(" ")
+
+            base64_captcha = self.generate(*args, **kwargs)
+            data = f"data:image/png;base64, {base64_captcha}"
+            #TODO: replace it with argument base function: users can set ud,class,and ... in template in captcha:filter
+            css = f"class=\'{kwargs.get('css_class')}\'" if kwargs.get('css_class', None) else ''
+            return Markup(f"""<img src='{data}' {css} >""")
 
         app.jinja_env.globals['captcha'] = _generate
 
-        # Check for sessions that do not persist on the server. Issue a warning because
-        # they are most likely open to replay attacks. This addon is built upon flask-session.
-        session_type = app.config.get('SESSION_TYPE')
-        if session_type is None or session_type == "null":
-            raise RuntimeWarning(
-                "Flask-Sessionstore is not set to use a server persistent storage type. This likely means that captchas are vulnerable to replay attacks.")
-        elif session_type == "sqlalchemy":
-            # I have to do this as of version 0.3.1 of flask-session if using sqlalchemy as the session type in order to create the initial database.
-            # Flask-sessionstore seems to have the same problem.
-            app.session_interface.db.create_all()
-
-    def generate(self):
+    def generate(self,*args, **kwargs) -> str:
         """
-        Generates and returns a numeric captcha image in base64 format. 
-        Saves the correct answer in `session[self.session_key]`
-        Use later as:
+            generate captcha with given flags
 
-        src = captcha.generate()
-        <img src="{{src}}">
+            :param:
+                numeric: if True generate captcha with numeric only
+                alphabet: if True generate captcha with alphabet
+                punctuation if True generate captcha with punctuation symbols
+
+            if both alphabet and numeric set to True this function generate captcha that contain both alphabet and numeric
+
         """
-        answer = self.rand.randrange(self.max)
-        answer = str(answer).zfill(self.digits)
+
+        if not kwargs.get("numeric"):
+            numeric = self.include_numeric
+        if not kwargs.get("alphabet"):
+            alphabet = self.include_alphabet
+        if not kwargs.get("punctuation"):
+            punctuation = self.include_punctuation
+
+        # single mode captcha options
+        answer = []
+        if numeric and not alphabet and not punctuation:
+            answer += self.random_number(length=self.length)
+        if alphabet and not numeric and not punctuation:
+            answer += self.random_alphabet(length=self.length)
+        if punctuation and not numeric and not alphabet:
+            answer += self.random_punctuation(length=self.length)
+
+        if len(answer) == 0:  # mix captcha mode
+            selected = {}
+            if punctuation:
+                selected["punctuation"] = self.random_punctuation
+            if numeric:
+                selected["numeric"] = self.random_number
+            if alphabet:
+                selected["alphabet"] = self.random_alphabet
+
+            total = sum([alphabet, numeric, punctuation])
+            each_round = self.length // total
+            for each in selected:
+                answer += (selected[each](length=each_round))
+
+            answer += (self.random_alphabet(length=(self.length - len(answer))))
+            self.shuffle_list(answer)
+
+        answer = "".join(answer)
         image_data = self.image_generator.generate(answer)
         base64_captcha = base64.b64encode(
             image_data.getvalue()).decode("ascii")
-        logging.debug('Generated captcha with answer: ' + answer)
+        self.Logger.info(f'Captcha Generated:\nKey:{answer}\tAnswer:{answer}')
         session[self.session_key] = answer
         return base64_captcha
 
-    def validate(self, form_key="captcha", value=None):
+    def validate(self, form_key:str="captcha", value:str=None) -> bool:
         """
         Validate a captcha answer (taken from request.form) against the answer saved in the session.
         Returns always true if CAPTCHA_ENABLE is set to False. Otherwise return true only if it is the correct answer.
@@ -82,16 +143,14 @@ class FlaskSessionCaptcha(object):
         if not self.enabled:
             return True
 
-        session_value = session.get(self.session_key)
+        session_value = session.get(self.session_key, None)
         if not session_value:
             return False
 
-        if not value and form_key in request.form:
-            value = request.form[form_key].strip()
+        value = request.form.get(form_key, None)
 
-        # invalidate the answer to stop new tries on the same challenge.
-        session[self.session_key] = None
-        return value is not None and value == session_value
+        session.pop(self.session_key)
+        return value == session_value
 
     def get_answer(self):
         """
