@@ -48,7 +48,7 @@ Usage
     app.config['CAPTCHA_SESSION_KEY'] = 'captcha_image' # In case you want to use another key in your session to store the captcha:
 
     # session config
-    app.config['SESSION_TYPE'] = 'redis' # or other type of drivers for session, see flask-session doc
+    app.config['SESSION_TYPE'] = 'redis' # or other type of drivers for session, see https://flask-session.readthedocs.io/en/latest/
     Session(app)
     captcha = FlaskSessionCaptcha(app)
 
