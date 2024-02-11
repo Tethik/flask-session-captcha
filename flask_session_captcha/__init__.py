@@ -1,7 +1,9 @@
 # build in
 import base64
-import random
+import secrets
 import string
+from random import SystemRandom
+
 
 # lib
 from captcha.image import ImageCaptcha
@@ -32,17 +34,20 @@ class BaseConfig:
     include_punctuation:bool = False
 
 
+    random = SystemRandom()
+
     def random_number(self, length: int) -> list:
-        return random.choices(self._numbers, k=length)
+        return [secrets.choice(self._numbers) for i in range(length)]
 
     def random_punctuation(self, length: int) -> list:
-        return random.choices(self._punctuation, k=length)
+        return [secrets.choice(self._punctuation) for i in range(length)]
 
     def random_alphabet(self, length: int) -> list:
-        return random.choices(self._alphabet, k=length)
+        return [secrets.choice(self._alphabet) for i in range(length)]
 
     def shuffle_list(self, list_captcha: list) -> None:
-        random.shuffle(list_captcha)
+        self.random.shuffle(list_captcha)
+
 
 
 class FlaskSessionCaptcha(BaseConfig):
@@ -78,9 +83,8 @@ class FlaskSessionCaptcha(BaseConfig):
 
             base64_captcha = self.generate(*args, **kwargs)
             data = f"data:image/png;base64, {base64_captcha}"
-            #TODO: replace it with argument base function: users can set ud,class,and ... in template in captcha:filter
             css = f"class=\'{kwargs.get('css_class')}\'" if kwargs.get('css_class', None) else ''
-            return Markup(f"""<img src='{data}' {css} >""")
+            return Markup(f"<img src='{data}' {css} >")
 
         app.jinja_env.globals['captcha'] = _generate
 
@@ -134,7 +138,7 @@ class FlaskSessionCaptcha(BaseConfig):
         image_data = self.image_generator.generate(answer)
         base64_captcha = base64.b64encode(
             image_data.getvalue()).decode("ascii")
-        self.Logger.info(f'Captcha Generated:\nKey:{answer}\tAnswer:{answer}')
+        self.Logger.debug(f'Captcha Generated:\nKey:{answer}\tAnswer:{answer}')
         session[self.session_key] = answer
         return base64_captcha
 
@@ -151,7 +155,6 @@ class FlaskSessionCaptcha(BaseConfig):
             return False
 
         value = request.form.get(form_key, None)
-
         session.pop(self.session_key)
         return value == session_value
 
