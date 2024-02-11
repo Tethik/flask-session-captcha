@@ -4,7 +4,6 @@ import secrets
 import string
 from random import SystemRandom
 
-
 # lib
 from captcha.image import ImageCaptcha
 from flask import session, request, Flask
@@ -25,14 +24,13 @@ class BaseConfig:
     width: int = 180,
     height: int = 80,
 
-    _alphabet:str = string.ascii_lowercase
-    _punctuation:str = string.punctuation
-    _numbers :str= string.digits
+    _alphabet: str = string.ascii_lowercase
+    _punctuation: str = string.punctuation
+    _numbers: str = string.digits
 
-    include_alphabet:bool = True
-    include_numeric:bool = True
-    include_punctuation:bool = False
-
+    include_alphabet: bool = True
+    include_numeric: bool = True
+    include_punctuation: bool = False
 
     random = SystemRandom()
 
@@ -47,7 +45,6 @@ class BaseConfig:
 
     def shuffle_list(self, list_captcha: list) -> None:
         self.random.shuffle(list_captcha)
-
 
 
 class FlaskSessionCaptcha(BaseConfig):
@@ -75,7 +72,6 @@ class FlaskSessionCaptcha(BaseConfig):
         self.include_numeric = app.config.get("CAPTCHA_INCLUDE_NUMERIC", self.include_numeric)
         self.include_punctuation = app.config.get("CAPTCHA_INCLUDE_PUNCTUATION", self.include_punctuation)
 
-
         def _generate(*args, **kwargs) -> Markup:
             """Generate Captcha Image"""
             if not self.enabled:
@@ -88,7 +84,7 @@ class FlaskSessionCaptcha(BaseConfig):
 
         app.jinja_env.globals['captcha'] = _generate
 
-    def generate(self,*args, **kwargs) -> str:
+    def generate(self, *args, **kwargs) -> str:
         """
             generate captcha with given flags
 
@@ -142,7 +138,7 @@ class FlaskSessionCaptcha(BaseConfig):
         session[self.session_key] = answer
         return base64_captcha
 
-    def validate(self, form_key:str="captcha", value:str=None) -> bool:
+    def validate(self, form_key: str = "captcha", value: str = None) -> bool:
         """
         Validate a captcha answer (taken from request.form) against the answer saved in the session.
         Returns always true if CAPTCHA_ENABLE is set to False. Otherwise return true only if it is the correct answer.
