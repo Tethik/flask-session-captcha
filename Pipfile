@@ -7,10 +7,10 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "*"
 pylint = "*"
+redis = "*"
 rope = "*"
-flask-sessionstore = "*"
+flask-session = "*"
 flask-session-captcha = {editable = true,path = "."}
-flask-sqlalchemy = "*"
 flake8 = "*"
 autopep8 = "*"
 
