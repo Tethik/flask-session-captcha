@@ -1,8 +1,15 @@
 import uuid
+try:
+    import redis
+except ImportError:
+    raise ImportError("redis package was not installed. install it via `pip install redis` ")
 
-import redis
+try:
+    from flask_session import Session
+except ImportError:
+    raise ImportError("flask-session package was not installed. install it via `pip install flask-session` ")
+
 from flask import Flask, request, render_template
-from flask_session import Session
 from flask_session_captcha import FlaskSessionCaptcha
 
 app = Flask(__name__)
@@ -18,10 +25,10 @@ app.config["CAPTCHA_WIDTH"] = 200
 app.config["CAPTCHA_HEIGHT"] = 160
 app.config['CAPTCHA_INCLUDE_ALPHABET'] = True # include alphabet<letters>
 app.config['CAPTCHA_INCLUDE_NUMERIC'] = False # include numeric
-app.config['CAPTCHA_INCLUDE_PUNCTUATION'] = True # include symbols
+app.config['CAPTCHA_INCLUDE_PUNCTUATION'] = False # include symbols
 
 
-# session config
+# flask-session config https://flask-session.readthedocs.io/en/latest/
 app.config['SESSION_TYPE'] = 'redis'
 app.config["SESSION_REDIS"] = redis.Redis()
 
