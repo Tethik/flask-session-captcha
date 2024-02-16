@@ -256,11 +256,11 @@
         },
         "cachelib": {
             "hashes": [
-                "sha256:bd20fb49eb8822d4dbec239555818fc5c6e39d6e132a382d63e4e174f35b5956",
-                "sha256:d7289c9460c5cd4ef2506643d3b93d0e3accdf0a2f5792e4a4c0a26352ca462e"
+                "sha256:038f4d855afc3eb8caab10458f6eac55c328911f9055824c22c2f259ef9ed3a3",
+                "sha256:8243029a028436fd23229113dee517c0700bb43a8a289ec5a963e4af9ca2b194"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==0.11.0"
+            "version": "==0.12.0"
         },
         "captcha": {
             "hashes": [
