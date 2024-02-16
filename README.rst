@@ -42,9 +42,9 @@ Usage
     app.config['CAPTCHA_LENGTH'] = 5
     app.config['CAPTCHA_WIDTH'] = 200
     app.config['CAPTCHA_HEIGHT'] = 160
-    app.config['CAPTCHA_LETTERS'] = True # include letters
-    app.config['CAPTCHA_ALPHABET'] = True # include alphabet chart
-    app.config['CAPTCHA_PUNCTUATION'] = False # include symbols
+    app.config['CAPTCHA_INCLUDE_ALPHABET'] = True
+    app.config['CAPTCHA_INCLUDE_NUMERIC'] = True
+    app.config['CAPTCHA_INCLUDE_PUNCTUATION'] = False
     app.config['CAPTCHA_SESSION_KEY'] = 'captcha_image' # In case you want to use another key in your session to store the captcha:
 
     # session config
