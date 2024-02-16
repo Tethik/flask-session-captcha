@@ -6,12 +6,11 @@ from random import SystemRandom
 
 # lib
 from captcha.image import ImageCaptcha
-from flask import session, request, Flask
+from flask import session, request, Flask, current_app
 from markupsafe import Markup
 
 # flask_session_captcha
 from . import exception as ex
-from . import logger as Log
 
 
 class BaseConfig:
@@ -54,7 +53,6 @@ class FlaskSessionCaptcha(BaseConfig):
             raise ex.NotFlaskApp(f"object {app} not a Flask instance.")
 
         self.init_app(app)
-        self.Logger = Log.get_logger()
 
     def init_app(self, app: Flask):
         """
@@ -134,7 +132,7 @@ class FlaskSessionCaptcha(BaseConfig):
         image_data = self.image_generator.generate(answer)
         base64_captcha = base64.b64encode(
             image_data.getvalue()).decode("ascii")
-        self.Logger.debug(f'Captcha Generated:\nKey:{answer}\tAnswer:{answer}')
+        current_app.logger.debug(f'Captcha Generated:\nKey:{answer}\tAnswer:{answer}')
         session[self.session_key] = answer
         return base64_captcha
 
