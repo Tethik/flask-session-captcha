@@ -132,14 +132,19 @@ class FlaskSessionCaptcha(BaseConfig):
         image_data = self.image_generator.generate(answer)
         base64_captcha = base64.b64encode(
             image_data.getvalue()).decode("ascii")
-        current_app.logger.debug(f'Captcha Generated:\nKey:{answer}\tAnswer:{answer}')
-        session[self.session_key] = answer
+        current_app.logger.debug(f'Captcha Generated:\nKey:{answer}')
+        self.set_in_session(key=self.session_key, value=answer)
         return base64_captcha
 
     def validate(self, form_key: str = "captcha", value: str = None) -> bool:
         """
         Validate a captcha answer (taken from request.form) against the answer saved in the session.
         Returns always true if CAPTCHA_ENABLE is set to False. Otherwise return true only if it is the correct answer.
+
+        Args:
+            from_key: str: key in post request for captcha that user typed in
+            value: str:  captcha answer that user typed in
+
         """
         if not self.enabled:
             return True
@@ -148,7 +153,7 @@ class FlaskSessionCaptcha(BaseConfig):
         if not session_value:
             return False
 
-        value = request.form.get(form_key, None)
+        value = request.form.get(form_key, None) or value
         session.pop(self.session_key)
         return value == session_value
 
@@ -157,3 +162,9 @@ class FlaskSessionCaptcha(BaseConfig):
         Shortcut function that returns the currently saved answer.
         """
         return session.get(self.session_key)
+
+    def set_in_session(self, key:str, value:str) -> bool:
+        if self.enabled:
+            key = key or self.session_key
+            session[key] = value
+            return True
