@@ -83,54 +83,79 @@ class FlaskSessionCaptcha(BaseConfig):
         if not self.enabled:
             return Markup(" ")
 
-        base64_captcha = self.__generate(*args, **kwargs)
+        # if none of options passed by developer set all options to False
+        base64_captcha = self.__generate(include_alphabet=kwargs.get(__key="include_alphabet", __default=False),
+                                         include_punctuation=kwargs.get(__key="include_punctuation", __default=False),
+                                         include_numeric=kwargs.get(__key="include_numeric", __default=False))
+
         data = f"data:image/png;base64, {base64_captcha}"
         css = f"class=\'{kwargs.get('css_class')}\'" if kwargs.get('css_class', None) else ''
         return Markup(f"<img src='{data}' {css} >")
 
-    def __generate(self, *args, **kwargs) -> str:
+    def __generate(self, include_alphabet: bool, include_punctuation: bool, include_numeric: bool) -> str:
         """
-            generate captcha with given flags
+        generate captcha with given flags
+        Don't call this method Directly. use self.generate() instead
 
             :param:
-                numeric: if True generate captcha with numeric only
-                alphabet: if True generate captcha with alphabet
-                punctuation if True generate captcha with punctuation symbols
-        ××××
-        Don't call this method Directly. use self.generate() instead
-        """
+                include_numeric: if True generate captcha with numeric only
+                include_alphabet: if True generate captcha with alphabet
+                include_punctuation if True generate captcha with punctuation symbols
 
-        if not kwargs.get("numeric"):
-            numeric = self.include_numeric
-        if not kwargs.get("alphabet"):
-            alphabet = self.include_alphabet
-        if not kwargs.get("punctuation"):
-            punctuation = self.include_punctuation
+            :returns:str:
+                string value of captcha encoded in base64
+
+       this method generate captcha with default options:
+                Baseconfig.include_alphabet: bool = True
+                Baseconfig.include_numeric: bool = True
+                Baseconfig.include_punctuation: bool = False
+
+
+        if you want to generate a single captcha with different option you can change it with passing these arguments to
+        template filter
+
+        example:
+            {{  captcha() }} # generate a captcha with default config or options that sets in app.config
+            {{  captcha(include_numeric=True) }} # generate a captcha with only #numeric
+            {{  captcha(include_alphabet=True) }} # generate a captcha with only #alphabet
+
+        """
+        answer = []
+        args = [include_numeric, include_alphabet, include_punctuation]
+        args = [any([each]) for each in args] # make sure all inputs are valid <True, False>
+        is_arg_passed = sum(args)
+
+        if not is_arg_passed:  # if options not passed by developer use default config
+            include_numeric = self.include_numeric
+            include_alphabet = self.include_alphabet
+            include_punctuation = self.include_punctuation
 
         # single mode captcha options
-        answer = []
-        if numeric and not alphabet and not punctuation:
+        if include_numeric and not include_alphabet and not include_punctuation:  # only numeric captcha
             answer += self.random_number(length=self.length)
-        if alphabet and not numeric and not punctuation:
+        if include_alphabet and not include_numeric and not include_punctuation:  # only alphabetical captcha
             answer += self.random_alphabet(length=self.length)
-        if punctuation and not numeric and not alphabet:
+        if include_punctuation and not include_numeric and not include_alphabet:  # only punctuation captcha
             answer += self.random_punctuation(length=self.length)
 
-        if len(answer) == 0:  # mix captcha mode
+        if len(answer) == 0:  # mix captcha mode <developer passed more than one option>
             selected = {}
-            if punctuation:
+            # determine which options passed by developer
+            if include_punctuation:
                 selected["punctuation"] = self.random_punctuation
-            if numeric:
+            if include_numeric:
                 selected["numeric"] = self.random_number
-            if alphabet:
+            if include_alphabet:
                 selected["alphabet"] = self.random_alphabet
 
-            total = sum([alphabet, numeric, punctuation])
-            each_round = self.length // total
-            for each in selected:
-                answer += (selected[each](length=each_round))
+            each_option_char_len = self.length // is_arg_passed
+            # calculate evenly space for each option base on options
 
-            answer += (self.random_alphabet(length=(self.length - len(answer))))
+            for each in selected:
+                answer += (selected[each](length=each_option_char_len))
+
+            answer += (self.random_alphabet(
+                length=(self.length - len(answer))))  # fill gap with alphabet if is_arg_passed wsa odd number
             self.shuffle_list(answer)
 
         answer = "".join(answer)
