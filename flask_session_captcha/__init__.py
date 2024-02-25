@@ -16,6 +16,7 @@ from . import exception as ex
 class BaseConfig:
     """ Default configs """
     enabled: bool = True
+    log: bool = False
     length: int = 4  # minimum length
     session_key: str = "captcha_answer"
     image_generator: ImageCaptcha = None
@@ -69,20 +70,25 @@ class FlaskSessionCaptcha(BaseConfig):
         self.include_alphabet = app.config.get("CAPTCHA_INCLUDE_ALPHABET", self.include_alphabet)
         self.include_numeric = app.config.get("CAPTCHA_INCLUDE_NUMERIC", self.include_numeric)
         self.include_punctuation = app.config.get("CAPTCHA_INCLUDE_PUNCTUATION", self.include_punctuation)
+        self.log = app.config.get("CAPTCHA_LOG", self.log)
 
-        def _generate(*args, **kwargs) -> Markup:
-            """Generate Captcha Image"""
-            if not self.enabled:
-                return Markup(" ")
+        @app.context_processor
+        def app_context_processor():
+            return {"captcha": self.generate}
 
-            base64_captcha = self.generate(*args, **kwargs)
-            data = f"data:image/png;base64, {base64_captcha}"
-            css = f"class=\'{kwargs.get('css_class')}\'" if kwargs.get('css_class', None) else ''
-            return Markup(f"<img src='{data}' {css} >")
+        app.extensions['flask_session_captcha'] = self  # bind captcha object to app
 
-        app.jinja_env.globals['captcha'] = _generate
+    def generate(self, *args, **kwargs) -> Markup:
+        """Generate Captcha Image"""
+        if not self.enabled:
+            return Markup(" ")
 
-    def generate(self, *args, **kwargs) -> str:
+        base64_captcha = self.__generate(*args, **kwargs)
+        data = f"data:image/png;base64, {base64_captcha}"
+        css = f"class=\'{kwargs.get('css_class')}\'" if kwargs.get('css_class', None) else ''
+        return Markup(f"<img src='{data}' {css} >")
+
+    def __generate(self, *args, **kwargs) -> str:
         """
             generate captcha with given flags
 
@@ -90,9 +96,8 @@ class FlaskSessionCaptcha(BaseConfig):
                 numeric: if True generate captcha with numeric only
                 alphabet: if True generate captcha with alphabet
                 punctuation if True generate captcha with punctuation symbols
-
-            if both alphabet and numeric set to True this function generate captcha that contain both alphabet and numeric
-
+        ××××
+        Don't call this method Directly. use self.generate() instead
         """
 
         if not kwargs.get("numeric"):
@@ -130,16 +135,15 @@ class FlaskSessionCaptcha(BaseConfig):
 
         answer = "".join(answer)
         image_data = self.image_generator.generate(answer)
-        base64_captcha = base64.b64encode(
-            image_data.getvalue()).decode("ascii")
-        current_app.logger.debug(f'Captcha Generated:\nKey:{answer}')
+        base64_captcha = base64.b64encode(image_data.getvalue()).decode("ascii")
         self.set_in_session(key=self.session_key, value=answer)
+        self.debug_log(f"Captcha Generated. key: {answer}")
         return base64_captcha
 
     def validate(self, form_key: str = "captcha", value: str = None) -> bool:
         """
         Validate a captcha answer (taken from request.form) against the answer saved in the session.
-        Returns always true if CAPTCHA_ENABLE is set to False. Otherwise return true only if it is the correct answer.
+        Returns always true if CAPTCHA_ENABLE is set to False. otherwise return true only if it is the correct answer.
 
         Args:
             from_key: str: key in post request for captcha that user typed in
@@ -163,8 +167,13 @@ class FlaskSessionCaptcha(BaseConfig):
         """
         return session.get(self.session_key)
 
-    def set_in_session(self, key:str, value:str) -> bool:
+    def set_in_session(self, key: str, value: str):
+        """Setting a captcha in user's session if captcha enable is on"""
         if self.enabled:
             key = key or self.session_key
             session[key] = value
-            return True
+
+    def debug_log(self, message: str):
+        """Log message to stdout using flask internal logger"""
+        if self.log:
+            current_app.logger.debug(message)
