@@ -98,7 +98,7 @@ class FlaskSessionCaptcha(BaseConfig):
         Don't call this method Directly. use self.generate() instead
 
             :param:
-                include_numeric: if True generate captcha with numeric only
+                include_numeric: if True generate captcha with numeric
                 include_alphabet: if True generate captcha with alphabet
                 include_punctuation if True generate captcha with punctuation symbols
 
