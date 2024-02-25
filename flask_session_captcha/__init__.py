@@ -84,9 +84,9 @@ class FlaskSessionCaptcha(BaseConfig):
             return Markup(" ")
 
         # if none of options passed by developer set all options to False
-        base64_captcha = self.__generate(include_alphabet=kwargs.get(__key="include_alphabet", __default=False),
-                                         include_punctuation=kwargs.get(__key="include_punctuation", __default=False),
-                                         include_numeric=kwargs.get(__key="include_numeric", __default=False))
+        base64_captcha = self.__generate(include_alphabet=kwargs.get("include_alphabet",False),
+                                         include_punctuation=kwargs.get("include_punctuation",False),
+                                         include_numeric=kwargs.get("include_numeric", False))
 
         data = f"data:image/png;base64, {base64_captcha}"
         css = f"class=\'{kwargs.get('css_class')}\'" if kwargs.get('css_class', None) else ''
