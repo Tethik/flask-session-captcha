@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <form method="POST">
+        {{ captcha(css_class="captcha_is_ok_in_template") }} <!-- This renders an <img> tag with the captcha img. -->
+        <input type="text" name="captcha">
+        <input type="submit">
+    </form>
+
+</body>
+</html>

@@ -1,31 +1,26 @@
-import logging
-
-import flask
-
-
-def test_captcha_config_set_ok(app):
+def test_captcha_config_set_ok(app, captcha):
     """Test captcha config is ok and flask_session_captcha reads all config properly from app.config"""
-    assert app.config.get("CAPTCHA_ENABLE") == app.extensions['C'].enabled
-    assert app.config.get("CAPTCHA_LENGTH") == app.extensions['C'].length
-    assert app.config.get("CAPTCHA_WIDTH") == app.extensions['C'].width
-    assert app.config.get("CAPTCHA_HEIGHT") == app.extensions['C'].height
-    assert app.config.get("CAPTCHA_SESSION_KEY") == app.extensions['C'].session_key
-    assert app.config.get("CAPTCHA_INCLUDE_ALPHABET") == app.extensions['C'].include_alphabet
-    assert app.config.get("CAPTCHA_INCLUDE_NUMERIC") == app.extensions['C'].include_numeric
-    assert app.config.get("CAPTCHA_INCLUDE_PUNCTUATION") == app.extensions['C'].include_punctuation
+    assert app.config.get("CAPTCHA_ENABLE") == captcha.enabled
+    assert app.config.get("CAPTCHA_LENGTH") == captcha.length
+    assert app.config.get("CAPTCHA_WIDTH") == captcha.width
+    assert app.config.get("CAPTCHA_HEIGHT") == captcha.height
+    assert app.config.get("CAPTCHA_SESSION_KEY") == captcha.session_key
+    assert app.config.get("CAPTCHA_INCLUDE_ALPHABET") == captcha.include_alphabet
+    assert app.config.get("CAPTCHA_INCLUDE_NUMERIC") == captcha.include_numeric
+    assert app.config.get("CAPTCHA_INCLUDE_PUNCTUATION") == captcha.include_punctuation
+
+    assert app.extensions['flask_session_captcha'] == captcha
 
 
-
-
-def test_captcha_enable( app, client):
-    """Test flask_session_captcha.validate method in enable True,False"""
-    app.extensions['C'].enabled = False
-    assert app.extensions['C'].validate(value="what ever") == True
-
+def test_captcha_enable(app, client, captcha):
+    """testing flask_session_captcha.validate method act properly
+     with enable option<True, False>"""
+    captcha.enabled = False
+    assert captcha.validate(value="what ever") == True
 
     @app.post("/test-captcha/")
     def test():
-        if app.extensions['C'].validate():
+        if captcha.validate():
             return "OK"
         else:
             return "NOT OK"
@@ -34,18 +29,48 @@ def test_captcha_enable( app, client):
     # it should be return True
     assert b'OK' == client.post("/test-captcha/").get_data()
 
-    app.extensions['C'].enabled = True
+    captcha.enabled = True
     # captcha enable if True so validate method should be return false
     assert b'OK' != client.post("/test-captcha/").get_data()
 
-    app.extensions['C'].enabled = False
-
-def test_captcha_length(app):
-    ...
-
-def test_captcha_wrong_answer():
-    ...
+    captcha.enabled = False
 
 
-def test_captcha_correct_answer():
-    ...
+def test_captcha_render_in_template(captcha, client, bind_base_views):
+    """Testing captcha is render in template
+    with considering enable option
+    """
+    captcha.enabled = True  # captcha should render in template
+
+    result = client.get("/test/").get_data()
+    assert b"class='captcha_is_ok_in_template'" in result
+    captcha.enabled = False
+
+    result = client.get("/test/").get_data()
+    assert b"class='captcha_is_ok_in_template'" not in result
+
+
+def test_captcha_wrong_answer(client, captcha, bind_base_views):
+    with client:
+        result = client.get("/test/")  # generate a captcha
+        answer = captcha.get_answer()
+        result = client.post("/test/", data={"captcha": "wrong answer", "submit": "submit"}).get_data()
+        assert b"NOT OK" == result
+
+
+def test_captcha_correct_answer(client, captcha, bind_base_views):
+    with client:
+        result = client.get("/test/")  # generate a captcha
+        answer = captcha.get_answer()
+        result = client.post("/test/", data={"captcha": answer, "submit": "submit"}).get_data()
+        assert b"OK" == result
+
+
+def test_captcha_length(client, app, captcha, bind_base_views):
+    """testing captcha length is same as options"""
+    with client:
+        for i in range(4, 15):
+            captcha.length = i
+            result = client.get("/test/")  # generate a captcha
+            answer = captcha.get_answer()
+            assert len(answer) == captcha.length
