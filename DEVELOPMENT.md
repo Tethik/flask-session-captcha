@@ -15,3 +15,5 @@ pytest --cov=flask_session_captcha --cov-report=term-missing
 
 ## TODO
 1. adding new method for logging data in terminal base on CAPTCHA_LOG env
+2. adding new test for testing template rendering with all options <include_alphabet, include_numeric, include_punctuation>
+3. 
