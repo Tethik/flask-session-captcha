@@ -13,7 +13,7 @@ setup(
     long_description=README,
     url='https://github.com/Tethik/flask-session-captcha',
     packages=['flask_session_captcha'],
-    package_data={'': ['LICENSE', 'README.rst']},
+    package_data={'': ['LICENSE', 'README.md']},
     install_requires=[
         'captcha',
         'Flask',
@@ -23,7 +23,7 @@ setup(
         'flake8',
         'pytest',
         'pytest-cov',
-        'Flask-SQLAlchemy',
+        'redis'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
