@@ -15,6 +15,10 @@ Support for different types of captchas such as numeric/letter/symbol captchas.
 * [flask-session](https://pypi.python.org/pypi/Flask-Session/) with packages depending on which SESSION_TYPE you use. E.g. sqlalchemy requires flask-sqlalchemy.
 * [captcha](https://pypi.python.org/pypi/captcha/)
 
+## Changelog
+
+* **1.4.0** - Migrated from `flask-sessionstore` to `flask-session`. Added functionality for alphabetic and punctuation characters to be included in the captcha (thanks @alisharify7). Support moved to python 3.8, 3.9, 3.10, 3.11.
+
 ## Usage
 ```python
 import uuid
