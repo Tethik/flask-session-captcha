@@ -66,6 +66,14 @@ def test_captcha_correct_answer(client, captcha, bind_base_views):
         assert b"OK" == result
 
 
+def test_captcha_no_answer(client, captcha, bind_base_views):
+    with client:
+        result = client.get("/test/")  # generate a captcha
+        answer = captcha.get_answer()
+        result = client.post("/test/", data={"submit": "submit"}).get_data()
+        assert b"NOT OK" == result
+
+
 def test_captcha_length(client, app, captcha, bind_base_views):
     """testing captcha length is same as options"""
     with client:
