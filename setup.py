@@ -11,6 +11,7 @@ setup(
     author_email='tethik@gmail.com',
     description='Captcha implementation for flask and flask-session.',
     long_description=README,
+    long_description_content_type="text/markdown",
     url='https://github.com/Tethik/flask-session-captcha',
     packages=['flask_session_captcha'],
     package_data={'': ['LICENSE', 'README.md']},
