@@ -129,6 +129,7 @@ class FlaskSessionCaptcha(BaseConfig):
             include_numeric = self.include_numeric
             include_alphabet = self.include_alphabet
             include_punctuation = self.include_punctuation
+            is_arg_passed = sum([include_numeric, include_alphabet, include_punctuation])
 
         # single mode captcha options
         if include_numeric and not include_alphabet and not include_punctuation:  # only numeric captcha
