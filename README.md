@@ -63,7 +63,6 @@ if __name__ == "__main__":
 
 Template can look as follows. `captcha.validate()` will be default try to validate against a form input with name "captcha".
 
-.. code-block:: html
 ```html
 <form method="POST">
     {{ captcha() }} <!-- This renders an <img> tag with the captcha img. -->
