@@ -80,3 +80,14 @@ It can also take a `css_class` argument to add classes to the generated DOM:
     <input type="submit">
 </form>
 ```
+
+You can also override settings for the captcha contents itself, via `include_alphabet`, `include_numeric` and `include_punctuation`.
+Like so:
+
+```html
+<form method="POST">
+    {{ captcha(include_alphabet=True) }}
+    <input type="text" name="captcha">
+    <input type="submit">
+</form>
+```
