@@ -20,11 +20,11 @@ app.config["SECRET_KEY"] = uuid.uuid4().hex
 
 # captcha config
 app.config['CAPTCHA_ENABLE'] = True
-app.config['CAPTCHA_LENGTH'] = 2
-app.config["CAPTCHA_WIDTH"] = 200
+app.config['CAPTCHA_LENGTH'] = 6
+app.config["CAPTCHA_WIDTH"] = 400
 app.config["CAPTCHA_HEIGHT"] = 160
-app.config['CAPTCHA_INCLUDE_ALPHABET'] = True # include alphabet<letters>
-app.config['CAPTCHA_INCLUDE_NUMERIC'] = False # include numeric
+app.config['CAPTCHA_INCLUDE_ALPHABET'] = False # include alphabet<letters>
+app.config['CAPTCHA_INCLUDE_NUMERIC'] = True # include numeric
 app.config['CAPTCHA_INCLUDE_PUNCTUATION'] = False # include symbols
 
 
