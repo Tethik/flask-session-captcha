@@ -28,7 +28,7 @@ class BaseConfig:
     _punctuation: str = string.punctuation
     _numbers: str = string.digits
 
-    include_alphabet: bool = True
+    include_alphabet: bool = False
     include_numeric: bool = True
     include_punctuation: bool = False
 
