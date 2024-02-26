@@ -23,9 +23,11 @@ app.config['CAPTCHA_ENABLE'] = True
 app.config['CAPTCHA_LENGTH'] = 6
 app.config["CAPTCHA_WIDTH"] = 400
 app.config["CAPTCHA_HEIGHT"] = 160
-app.config['CAPTCHA_INCLUDE_ALPHABET'] = False # include alphabet<letters>
-app.config['CAPTCHA_INCLUDE_NUMERIC'] = True # include numeric
-app.config['CAPTCHA_INCLUDE_PUNCTUATION'] = False # include symbols
+# app.config['CAPTCHA_INCLUDE_ALPHABET'] = False # include alphabet<letters>
+# app.config['CAPTCHA_INCLUDE_NUMERIC'] = True # include numeric
+# app.config['CAPTCHA_INCLUDE_PUNCTUATION'] = False # include symbols
+# app.config['CAPTCHA_LOG'] = False # log information to terminal
+# app.config['CAPTCHA_SESSION_KEY'] = 'captcha_image' # In case you want to use another key in your session to store the captcha
 
 
 # flask-session config https://flask-session.readthedocs.io/en/latest/
