@@ -84,9 +84,13 @@ class FlaskSessionCaptcha(BaseConfig):
             return Markup(" ")
 
         # if none of options passed by developer set all options to False
-        base64_captcha = self.__generate(include_alphabet=kwargs.get("include_alphabet",False),
-                                         include_punctuation=kwargs.get("include_punctuation",False),
-                                         include_numeric=kwargs.get("include_numeric", False))
+        answer = self.__generate(include_alphabet=kwargs.get("include_alphabet", self.include_alphabet),
+                                         include_punctuation=kwargs.get("include_punctuation", self.include_punctuation),
+                                         include_numeric=kwargs.get("include_numeric", self.include_numeric))
+        image_data = self.image_generator.generate(answer)
+        base64_captcha = base64.b64encode(image_data.getvalue()).decode("ascii")
+        self.set_in_session(key=self.session_key, value=answer)
+        self.debug_log(f"Captcha Generated. key: {answer}")
 
         data = f"data:image/png;base64, {base64_captcha}"
         css = f"class=\'{kwargs.get('css_class')}\'" if kwargs.get('css_class', None) else ''
@@ -120,53 +124,35 @@ class FlaskSessionCaptcha(BaseConfig):
             {{  captcha(include_alphabet=True) }} # generate a captcha with only #alphabet
 
         """
+        
+        selected = []
+                
+        if include_punctuation:
+            selected.append(self.random_punctuation)
+        if include_numeric:
+            selected.append(self.random_number)
+        if include_alphabet:
+            selected.append(self.random_alphabet)
+
+        if len(selected) == 0:
+            raise RuntimeError("all options are set to False, <include_numeric, include_alphabet, include_punctuation>. please configure at least one of the options to True")
+        
+        if self.length <= 0:
+            raise ValueError("captcha length should be greater than 0")
+
+        each_option_char_len = self.length // len(selected)
+
+        # calculate evenly space for each option base on options
         answer = []
-        args = [include_numeric, include_alphabet, include_punctuation]
-        args = [any([each]) for each in args] # make sure all inputs are valid <True, False>
-        is_arg_passed = sum(args)
+        for func in selected:
+            answer += func(each_option_char_len)
 
-        if not is_arg_passed:  # if options not passed by developer use default config
-            include_numeric = self.include_numeric
-            include_alphabet = self.include_alphabet
-            include_punctuation = self.include_punctuation
-            is_arg_passed = sum([include_numeric, include_alphabet, include_punctuation])
-            if not is_arg_passed:
-                raise RuntimeError("all options are set to False, <include_numeric, include_alphabet, include_punctuation>. please configure at least one of the options to True")
-
-        # single mode captcha options
-        if include_numeric and not include_alphabet and not include_punctuation:  # only numeric captcha
-            answer += self.random_number(length=self.length)
-        if include_alphabet and not include_numeric and not include_punctuation:  # only alphabetical captcha
-            answer += self.random_alphabet(length=self.length)
-        if include_punctuation and not include_numeric and not include_alphabet:  # only punctuation captcha
-            answer += self.random_punctuation(length=self.length)
-
-        if len(answer) == 0:  # mix captcha mode <developer passed more than one option>
-            selected = {}
-            # determine which options passed by developer
-            if include_punctuation:
-                selected["punctuation"] = self.random_punctuation
-            if include_numeric:
-                selected["numeric"] = self.random_number
-            if include_alphabet:
-                selected["alphabet"] = self.random_alphabet
-
-            each_option_char_len = self.length // is_arg_passed
-            # calculate evenly space for each option base on options
-
-            for each in selected:
-                answer += (selected[each](length=each_option_char_len))
-
-            answer += (self.random_alphabet(
-                length=(self.length - len(answer))))  # fill gap with alphabet if is_arg_passed wsa odd number
-            self.shuffle_list(answer)
-
+        answer += selected[-1](
+            length=(self.length - len(answer)))  # pad the gap with the last option in case of uneven length        
+        
+        self.shuffle_list(answer)
         answer = "".join(answer)
-        image_data = self.image_generator.generate(answer)
-        base64_captcha = base64.b64encode(image_data.getvalue()).decode("ascii")
-        self.set_in_session(key=self.session_key, value=answer)
-        self.debug_log(f"Captcha Generated. key: {answer}")
-        return base64_captcha
+        return answer        
 
     def validate(self, form_key: str = "captcha", value: str = None) -> bool:
         """
