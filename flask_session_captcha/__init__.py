@@ -9,9 +9,6 @@ from captcha.image import ImageCaptcha
 from flask import session, request, Flask, current_app
 from markupsafe import Markup
 
-# flask_session_captcha
-from . import exception as ex
-
 
 class BaseConfig:
     """ Default configs """
