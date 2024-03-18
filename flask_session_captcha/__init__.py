@@ -50,10 +50,8 @@ class BaseConfig:
 class FlaskSessionCaptcha(BaseConfig):
 
     def __init__(self, app: Flask = None):
-        if not isinstance(app, Flask):
-            raise ex.NotFlaskApp(f"object {app} not a Flask instance.")
-
-        self.init_app(app)
+        if app is not None:
+            self.init_app(app)
 
     def init_app(self, app: Flask):
         """
