@@ -22,6 +22,8 @@ setup(
     ],
     tests_require=[
         'flake8',
+        'flask_session',
+        'cachelib',
         'pytest',
         'pytest-cov',
         'redis'

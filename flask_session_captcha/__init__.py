@@ -13,7 +13,7 @@ from markupsafe import Markup
 class BaseConfig:
     """ Default configs """
     enabled: bool = True
-    log: bool = False
+    should_debug_log: bool = False
     length: int = 4  # minimum length
     session_key: str = "captcha_answer"
     image_generator: ImageCaptcha = None
@@ -65,7 +65,7 @@ class FlaskSessionCaptcha(BaseConfig):
         self.include_alphabet = app.config.get("CAPTCHA_INCLUDE_ALPHABET", self.include_alphabet)
         self.include_numeric = app.config.get("CAPTCHA_INCLUDE_NUMERIC", self.include_numeric)
         self.include_punctuation = app.config.get("CAPTCHA_INCLUDE_PUNCTUATION", self.include_punctuation)
-        self.log = app.config.get("CAPTCHA_LOG", self.log)
+        self.should_debug_log = app.config.get("CAPTCHA_DEBUG_LOG", self.should_debug_log)
 
         @app.context_processor
         def app_context_processor():
@@ -184,5 +184,5 @@ class FlaskSessionCaptcha(BaseConfig):
 
     def debug_log(self, message: str):
         """Log message to stdout using flask internal logger"""
-        if self.log:
+        if self.should_debug_log:
             current_app.logger.debug(message)

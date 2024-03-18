@@ -1,3 +1,19 @@
+from flask import Flask
+from flask_session_captcha import FlaskSessionCaptcha
+
+def test_captcha_later_init_app_ok():
+    app = Flask(__file__)
+    app.config['CAPTCHA_DEBUG_LOG'] = True
+    captcha = FlaskSessionCaptcha()    
+    captcha.init_app(app)
+    assert captcha.should_debug_log == app.config['CAPTCHA_DEBUG_LOG']
+    
+def test_captcha_init_ok():
+    app = Flask(__file__)
+    app.config['CAPTCHA_DEBUG_LOG'] = True
+    captcha = FlaskSessionCaptcha(app)        
+    assert captcha.should_debug_log == app.config['CAPTCHA_DEBUG_LOG']
+
 def test_captcha_config_set_ok(app, captcha):
     """Test captcha config is ok and flask_session_captcha reads all config properly from app.config"""
     assert app.config.get("CAPTCHA_ENABLE") == captcha.enabled
@@ -8,7 +24,6 @@ def test_captcha_config_set_ok(app, captcha):
     assert app.config.get("CAPTCHA_INCLUDE_ALPHABET") == captcha.include_alphabet
     assert app.config.get("CAPTCHA_INCLUDE_NUMERIC") == captcha.include_numeric
     assert app.config.get("CAPTCHA_INCLUDE_PUNCTUATION") == captcha.include_punctuation
-
     assert app.extensions['flask_session_captcha'] == captcha
 
 
