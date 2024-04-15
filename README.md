@@ -17,6 +17,7 @@ Support for different types of captchas such as numeric/letter/symbol captchas.
 
 ## Changelog
 
+* **1.4.2** - Bump pillow from 10.2.0 to 10.3.0 by @dependabot in #49
 * **1.4.1** - Fix error thrown when flask-session-captcha is init-ed without a Flask app object. Rename CAPTCHA_LOG environment variable to CAPTCHA_DEBUG_LOG.
 * **1.4.0** - Migrated from `flask-sessionstore` to `flask-session`. Added functionality for alphabetic and punctuation characters to be included in the captcha (thanks @alisharify7). Support moved to python 3.8, 3.9, 3.10, 3.11.
 
