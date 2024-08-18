@@ -5,7 +5,11 @@
 [![Supported python versions](https://img.shields.io/pypi/pyversions/flask-session-captcha.svg)](https://pypi.python.org/pypi/flask-session-captcha)
 [![License](https://img.shields.io/github/license/Tethik/flask-session-captcha.svg)](https://github.com/Tethik/flask-session-captcha/blob/master/LICENSE)
 
+[![Downloads](https://static.pepy.tech/badge/flask-session-captcha)](https://pepy.tech/project/flask-session-captcha)
+[![Downloads](https://static.pepy.tech/badge/flask-session-captcha/month)](https://pepy.tech/project/flask-session-captcha)
+[![Downloads](https://static.pepy.tech/badge/flask-session-captcha/week)](https://pepy.tech/project/flask-session-captcha)
 
+****
 A captcha implemention for flask using [flask-session](https://pypi.python.org/pypi/Flask-Session/) and [captcha](https://pypi.python.org/pypi/captcha/) packages. 
 Each captcha challenge answer is saved in the server side session of the challenged client.
 Support for different types of captchas such as numeric/letter/symbol captchas.
