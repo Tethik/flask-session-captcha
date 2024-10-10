@@ -151,8 +151,12 @@ class FlaskSessionCaptcha(BaseConfig):
 
     def validate(self, form_key: str = "captcha", value: str = None) -> bool:
         """
-        Validate a captcha answer (taken from request.form) against the answer saved in the session.
-        Returns always true if CAPTCHA_ENABLE is set to False. otherwise return true only if it is the correct answer.
+        Validate a captcha answer (taken from request.form)
+        against the answer saved in the session. you can pass the
+        typed answer directly using `value` param.
+        use this method for validating the captcha answer. 
+        Returns always true if CAPTCHA_ENABLE is set to False. 
+        otherwise return true only if it is the correct answer.
 
         Args:
             from_key: str: key in post request for captcha that user typed in
@@ -162,25 +166,27 @@ class FlaskSessionCaptcha(BaseConfig):
         if not self.enabled:
             return True
 
-        session_value = session.get(self.session_key, None)
-        if not session_value:
+        if not (session_value := self.get_answer()):
             return False
 
         value = request.form.get(form_key, None) or value
-        session.pop(self.session_key)
+        self.revoke_answer()
         return value == session_value
 
     def get_answer(self):
-        """
-        Shortcut function that returns the currently saved answer.
-        """
+        """Shortcut function that returns the currently saved answer."""
         return session.get(self.session_key)
 
-    def set_in_session(self, key: str, value: str):
-        """Setting a captcha in user's session if captcha enable is on"""
+    def set_answer(self, key: str, value: str):
+        """shortcut function for set captcha answer in the session."""
         if self.enabled:
             key = key or self.session_key
             session[key] = value
+    
+    def revoke_answer(self):
+        """revoke the captcha answer from session"""
+        if self.session_key in session:
+            session.pop(self.session_key)
 
     def debug_log(self, message: str):
         """Log message to stdout using flask internal logger"""
