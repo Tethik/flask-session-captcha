@@ -6,9 +6,10 @@ pytest --cov=flask_session_captcha --cov-report=term-missing
 
 ## Releasing to pypi
 1. Bump `VERSION` in setup.py
-2. Git tag `v` + VERSION
-3. Create release on github
-4. Github action handles the rest :)
+2. Update Changelog in README.md
+3. Git tag `v` + VERSION
+4. Create release on github
+5. Github action handles the rest :)
 
 
 
